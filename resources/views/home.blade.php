@@ -4,31 +4,28 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="card shadow-sm mb-4">
+                <!-- Card 1: Image -->
+                <div class="card shadow-sm mb-3">
                     <div class="card-body p-0">
-                        <div class="row g-0">
-                            <div class="col-lg-6">
-                                <div
-                                    class="dashboard-welcome-container p-4 p-lg-5 h-100 d-flex flex-column justify-content-center">
-                                    <div class="welcome-time mb-2">
-                                        <div class="current-date fs-5 text-muted"></div>
-                                        <div class="current-time display-4 fw-bold" style="color: #6f6e6e;"></div>
-                                    </div>
-                                    <h2 class="fs-1 fw-light mb-0" id="sikap" style="color: #6f6e6e;">SIMPERKAP</h2>
+                        <div class="dashboard-image-container position-relative">
+                            <img src="{{Vite::asset('resources/assets/images/kapalace.jpg')}}" class="dashboard-image">
+                            <div class="overlay"></div>
+                        </div>
+                    </div>
+                </div>
 
-                                    <p class="lead mt-2 text-strong" style="color: #6f6e6e;">
-                                        Sistem Informasi Manajemen Perkapalan
-                                    </p>
-
-
-                                </div>
+                <!-- Card 2: Text and Clock -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-4 p-lg-5">
+                        <div class="dashboard-welcome-container text-center">
+                            <div class="welcome-time mb-3">
+                                <div class="current-date fs-5 text-muted"></div>
+                                <div class="current-time display-4 fw-bold" style="color: #6f6e6e;"></div>
                             </div>
-                            <div class="col-lg-6 d-none d-lg-block">
-                                <div class="dashboard-image-container">
-                                    <img src="{{Vite::asset('resources/assets/images/kapalace.jpg')}}" class="dashboard-image">
-                                    <div class="overlay"></div>
-                                </div>
-                            </div>
+                            <h2 class="fs-1 fw-light mb-0" id="sikap" style="color: #6f6e6e;">SIMPERKAP</h2>
+                            <p class="lead mt-2 text-strong" style="color: #6f6e6e;">
+                                Sistem Informasi Manajemen Perkapalan
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -39,29 +36,26 @@
 
 @push('styles')
     <style>
-        .dashboard-welcome-container {
-            background-color: #fff;
-            position: relative;
-            z-index: 1;
+        .dashboard-image-container {
+            height: 100%;
+            overflow: hidden;
+            border-radius: 8px;
         }
 
-        .dashboard-image-container {
-            position: relative;
-            height: 350px; /* Batasi tinggi container */
-            overflow: hidden;
-            border-radius: 0 8px 8px 0; /* Rounded corners untuk sisi kanan */
+        .dashboard-welcome-container {
+            background-color: #fff;
         }
 
         .dashboard-image {
             width: 100%;
-            height: 100%;
+            height: 350px;
             object-fit: cover;
             object-position: center;
-            transition: transform 0.3s ease; /* Smooth transition untuk hover effect */
+            transition: transform 0.3s ease;
         }
 
         .dashboard-image:hover {
-            transform: scale(1.05); /* Slight zoom on hover */
+            transform: scale(1.05);
         }
 
         .overlay {
@@ -130,13 +124,13 @@
             }
 
             .dashboard-image-container {
-                height: 250px; /* Tinggi lebih kecil untuk mobile */
+                height: 250px;
             }
         }
 
         @media (max-width: 575.98px) {
             .dashboard-image-container {
-                height: 200px; /* Tinggi lebih kecil lagi untuk mobile kecil */
+                height: 200px;
             }
         }
     </style>

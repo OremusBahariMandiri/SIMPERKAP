@@ -125,20 +125,6 @@
                                                     @enderror
                                                 </div>
                                             </div>
-
-                                            <div class="form-group mb-3">
-                                                <label for="validasi_dok" class="form-label fw-bold">Peruntukan Dokumen</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text"><i class="fas fa-check-circle"></i></span>
-                                                    <input type="text" class="form-control @error('validasi_dok') is-invalid @enderror"
-                                                        id="validasi_dok" name="validasi_dok"
-                                                        value="{{ old('validasi_dok', $dokumenKapal->validasi_dok) }}"
-                                                        placeholder="Masukkan peruntukan dokumen">
-                                                    @error('validasi_dok')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -151,7 +137,7 @@
                                         </div>
                                         <div class="card-body">
                                             <div class="form-group mb-3">
-                                                <label class="form-label fw-bold">Jenis Masa Berlaku <span class="text-danger">*</span></label>
+                                                <label class="form-label fw-bold">Validasi Dokumen <span class="text-danger">*</span></label>
                                                 <div class="bg-light p-2 rounded">
                                                     <div class="form-check form-check-inline">
                                                         <input class="form-check-input jenis-masa-berlaku @error('jenis_masa_berlaku') is-invalid @enderror"

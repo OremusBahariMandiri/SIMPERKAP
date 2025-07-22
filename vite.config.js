@@ -14,7 +14,8 @@ export default defineConfig({
     server: {
         host: '0.0.0.0',
         hmr: {
-            host:'192.168.0.39'
+            // host:'192.168.0.39' // host JAMAS
+            host: '192.168.1.24' // host OREMUS
         },
         cors: {
             // origin: ['http://192.168.0.39:8081', 'http://127.0.0.1:8000'], // Server JAMAS

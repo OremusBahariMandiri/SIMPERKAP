@@ -47,7 +47,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('nama-dokumen', NamaDokumenController::class);
     Route::resource('dokumen-kapal', DokumenKapalController::class);
     Route::resource('ship-particular', ShipParticularController::class);
-
+    
+    Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     // Tambahan route untuk dokumen kapal
     Route::get('dokumen-kapal/{dokumenKapal}/download', [DokumenKapalController::class, 'download'])->name('dokumen-kapal.download');
     Route::get('ship-particular/{id}/download', [ShipParticularController::class, 'downloadFile'])

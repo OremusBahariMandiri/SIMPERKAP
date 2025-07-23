@@ -37,12 +37,27 @@ class DokumenKapalController extends Controller
     {
         $kapal = Kapal::all();
         $kategoriDokumen = KategoriDokumen::all();
-        $namaDokumen = NamaDokumen::all();
 
-        // Generar ID automático
+        // Get all nama dokumen with their kategori relationships
+        $namaDokumen = NamaDokumen::with('kategoriDokumen')->get();
+
+        // Create a grouped array for JavaScript
+        $namaDokumenByKategori = [];
+        foreach ($namaDokumen as $dokumen) {
+            $kategoriId = $dokumen->id_kode_a06;
+            if (!isset($namaDokumenByKategori[$kategoriId])) {
+                $namaDokumenByKategori[$kategoriId] = [];
+            }
+            $namaDokumenByKategori[$kategoriId][] = [
+                'id_kode' => $dokumen->id_kode,
+                'nama_dok' => $dokumen->nama_dok
+            ];
+        }
+
+        // Generate ID automatically
         $newId = $this->generateId('B01', 'b01_dokumen_kpl');
 
-        return view('dokumen-kapal.create', compact('kapal', 'kategoriDokumen', 'namaDokumen', 'newId'));
+        return view('dokumen-kapal.create', compact('kapal', 'kategoriDokumen', 'namaDokumen', 'namaDokumenByKategori', 'newId'));
     }
 
     public function store(Request $request)
@@ -136,8 +151,24 @@ class DokumenKapalController extends Controller
     {
         $kapal = Kapal::all();
         $kategoriDokumen = KategoriDokumen::all();
-        $namaDokumen = NamaDokumen::all();
-        return view('dokumen-kapal.edit', compact('dokumenKapal', 'kapal', 'kategoriDokumen', 'namaDokumen'));
+
+        // Get all nama dokumen with their kategori relationships
+        $namaDokumen = NamaDokumen::with('kategoriDokumen')->get();
+
+        // Create a grouped array for JavaScript
+        $namaDokumenByKategori = [];
+        foreach ($namaDokumen as $dokumen) {
+            $kategoriId = $dokumen->id_kode_a06;
+            if (!isset($namaDokumenByKategori[$kategoriId])) {
+                $namaDokumenByKategori[$kategoriId] = [];
+            }
+            $namaDokumenByKategori[$kategoriId][] = [
+                'id_kode' => $dokumen->id_kode,
+                'nama_dok' => $dokumen->nama_dok
+            ];
+        }
+
+        return view('dokumen-kapal.edit', compact('dokumenKapal', 'kapal', 'kategoriDokumen', 'namaDokumen', 'namaDokumenByKategori'));
     }
 
     public function update(Request $request, DokumenKapal $dokumenKapal)
@@ -146,7 +177,7 @@ class DokumenKapalController extends Controller
             'nama_kpl' => 'required|exists:a05_dm_kapal,id_kode',
             'kategori_dok' => 'required|exists:a06_dm_kategori_dok,id_kode',
             'nama_dok' => 'required|exists:a07_dm_nama_dok,id_kode',
-            'file_dok' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'file_dok' => 'nullable|file|mimes:pdf,jpg,jpeg,png',
         ]);
 
         // Hitung masa berlaku secara otomatis

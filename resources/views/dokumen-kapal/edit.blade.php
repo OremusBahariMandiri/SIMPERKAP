@@ -41,7 +41,8 @@
                                                 value="{{ $dokumenKapal->id_kode }}" hidden readonly>
 
                                             <div class="form-group mb-3">
-                                                <label for="no_reg_display" class="form-label fw-bold">Nomor Registrasi</label>
+                                                <label for="no_reg_display" class="form-label fw-bold">Nomor
+                                                    Registrasi</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
                                                     <input type="text" class="form-control" id="no_reg_display"
@@ -113,10 +114,12 @@
                                             </div>
 
                                             <div class="form-group mb-3">
-                                                <label for="penerbit_dok" class="form-label fw-bold">Penerbit Dokumen</label>
+                                                <label for="penerbit_dok" class="form-label fw-bold">Penerbit
+                                                    Dokumen</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text"><i class="fas fa-building"></i></span>
-                                                    <input type="text" class="form-control @error('penerbit_dok') is-invalid @enderror"
+                                                    <input type="text"
+                                                        class="form-control @error('penerbit_dok') is-invalid @enderror"
                                                         id="penerbit_dok" name="penerbit_dok"
                                                         value="{{ old('penerbit_dok', $dokumenKapal->penerbit_dok) }}"
                                                         placeholder="Masukkan penerbit dokumen">
@@ -133,23 +136,30 @@
                                 <div class="col-md-6">
                                     <div class="card h-100 border-secondary">
                                         <div class="card-header bg-secondary bg-opacity-25 text-dark">
-                                            <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Masa Berlaku & Tanggal</h5>
+                                            <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Masa Berlaku &
+                                                Tanggal</h5>
                                         </div>
                                         <div class="card-body">
                                             <div class="form-group mb-3">
-                                                <label class="form-label fw-bold">Validasi Dokumen <span class="text-danger">*</span></label>
+                                                <label class="form-label fw-bold">Validasi Dokumen <span
+                                                        class="text-danger">*</span></label>
                                                 <div class="bg-light p-2 rounded">
                                                     <div class="form-check form-check-inline">
-                                                        <input class="form-check-input jenis-masa-berlaku @error('jenis_masa_berlaku') is-invalid @enderror"
-                                                            type="radio" name="jenis_masa_berlaku" id="tetap" value="Tetap"
-                                                            {{ old('jenis_masa_berlaku', $dokumenKapal->tgl_berakhir_dok ? 'Perpanjangan' : 'Tetap') == 'Tetap' ? 'checked' : '' }} required>
+                                                        <input
+                                                            class="form-check-input jenis-masa-berlaku @error('jenis_masa_berlaku') is-invalid @enderror"
+                                                            type="radio" name="jenis_masa_berlaku" id="tetap"
+                                                            value="Tetap"
+                                                            {{ old('jenis_masa_berlaku', $dokumenKapal->tgl_berakhir_dok ? 'Perpanjangan' : 'Tetap') == 'Tetap' ? 'checked' : '' }}
+                                                            required>
                                                         <label class="form-check-label" for="tetap">
                                                             <i class="fas fa-infinity text-primary me-1"></i>Tetap
                                                         </label>
                                                     </div>
                                                     <div class="form-check form-check-inline">
-                                                        <input class="form-check-input jenis-masa-berlaku @error('jenis_masa_berlaku') is-invalid @enderror"
-                                                            type="radio" name="jenis_masa_berlaku" id="perpanjangan" value="Perpanjangan"
+                                                        <input
+                                                            class="form-check-input jenis-masa-berlaku @error('jenis_masa_berlaku') is-invalid @enderror"
+                                                            type="radio" name="jenis_masa_berlaku" id="perpanjangan"
+                                                            value="Perpanjangan"
                                                             {{ old('jenis_masa_berlaku', $dokumenKapal->tgl_berakhir_dok ? 'Perpanjangan' : 'Tetap') == 'Perpanjangan' ? 'checked' : '' }}>
                                                         <label class="form-check-label" for="perpanjangan">
                                                             <i class="fas fa-sync text-success me-1"></i>Perpanjangan
@@ -164,13 +174,16 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group mb-3">
-                                                        <label for="tgl_terbit_dok" class="form-label fw-bold">Tanggal Terbit <span
-                                                                class="text-danger">*</span></label>
+                                                        <label for="tgl_terbit_dok" class="form-label fw-bold">Tanggal
+                                                            Terbit <span class="text-danger">*</span></label>
                                                         <div class="input-group">
-                                                            <span class="input-group-text"><i class="fas fa-calendar-plus"></i></span>
-                                                            <input type="date" class="form-control tanggal-input @error('tgl_terbit_dok') is-invalid @enderror"
+                                                            <span class="input-group-text"><i
+                                                                    class="fas fa-calendar-plus"></i></span>
+                                                            <input type="date"
+                                                                class="form-control tanggal-input @error('tgl_terbit_dok') is-invalid @enderror"
                                                                 id="tgl_terbit_dok" name="tgl_terbit_dok"
-                                                                value="{{ old('tgl_terbit_dok', $dokumenKapal->tgl_terbit_dok ? date('Y-m-d', strtotime($dokumenKapal->tgl_terbit_dok)) : '') }}" required>
+                                                                value="{{ old('tgl_terbit_dok', $dokumenKapal->tgl_terbit_dok ? date('Y-m-d', strtotime($dokumenKapal->tgl_terbit_dok)) : '') }}"
+                                                                required>
                                                             @error('tgl_terbit_dok')
                                                                 <div class="invalid-feedback">{{ $message }}</div>
                                                             @enderror
@@ -179,10 +192,13 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group mb-3 tgl-berakhir-group">
-                                                        <label for="tgl_berakhir_dok" class="form-label fw-bold">Tanggal Berakhir</label>
+                                                        <label for="tgl_berakhir_dok" class="form-label fw-bold">Tanggal
+                                                            Berakhir</label>
                                                         <div class="input-group">
-                                                            <span class="input-group-text"><i class="fas fa-calendar-times"></i></span>
-                                                            <input type="date" class="form-control tanggal-input @error('tgl_berakhir_dok') is-invalid @enderror"
+                                                            <span class="input-group-text"><i
+                                                                    class="fas fa-calendar-times"></i></span>
+                                                            <input type="date"
+                                                                class="form-control tanggal-input @error('tgl_berakhir_dok') is-invalid @enderror"
                                                                 id="tgl_berakhir_dok" name="tgl_berakhir_dok"
                                                                 value="{{ old('tgl_berakhir_dok', $dokumenKapal->tgl_berakhir_dok ? date('Y-m-d', strtotime($dokumenKapal->tgl_berakhir_dok)) : '') }}">
                                                             @error('tgl_berakhir_dok')
@@ -196,17 +212,22 @@
                                             <div class="form-group mb-3">
                                                 <label for="masa_berlaku" class="form-label fw-bold">Masa Berlaku</label>
                                                 <input type="text" class="form-control bg-light" id="masa_berlaku"
-                                                    name="masa_berlaku" value="{{ old('masa_berlaku', $dokumenKapal->masa_berlaku) }}" readonly>
+                                                    name="masa_berlaku"
+                                                    value="{{ old('masa_berlaku', $dokumenKapal->masa_berlaku) }}"
+                                                    readonly>
                                                 <div class="form-text text-muted">
-                                                    <i class="fas fa-info-circle me-1"></i>Masa berlaku akan dihitung otomatis
+                                                    <i class="fas fa-info-circle me-1"></i>Masa berlaku akan dihitung
+                                                    otomatis
                                                 </div>
                                             </div>
 
                                             <div class="form-group mb-3 tgl-peringatan-group">
-                                                <label for="tgl_peringatan" class="form-label fw-bold">Tanggal Peringatan</label>
+                                                <label for="tgl_peringatan" class="form-label fw-bold">Tanggal
+                                                    Peringatan</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text"><i class="fas fa-bell"></i></span>
-                                                    <input type="date" class="form-control tanggal-input @error('tgl_peringatan') is-invalid @enderror"
+                                                    <input type="date"
+                                                        class="form-control tanggal-input @error('tgl_peringatan') is-invalid @enderror"
                                                         id="tgl_peringatan" name="tgl_peringatan"
                                                         value="{{ old('tgl_peringatan', $dokumenKapal->tgl_peringatan ? date('Y-m-d', strtotime($dokumenKapal->tgl_peringatan)) : '') }}">
                                                     @error('tgl_peringatan')
@@ -218,9 +239,12 @@
                                             <div class="form-group mb-3">
                                                 <label for="masa_peringatan" class="form-label fw-bold">Peringatan</label>
                                                 <input type="text" class="form-control bg-light" id="masa_peringatan"
-                                                    name="masa_peringatan" value="{{ old('masa_peringatan', $dokumenKapal->masa_peringatan) }}" readonly>
+                                                    name="masa_peringatan"
+                                                    value="{{ old('masa_peringatan', $dokumenKapal->masa_peringatan) }}"
+                                                    readonly>
                                                 <div class="form-text text-muted">
-                                                    <i class="fas fa-info-circle me-1"></i>Masa peringatan akan dihitung otomatis
+                                                    <i class="fas fa-info-circle me-1"></i>Masa peringatan akan dihitung
+                                                    otomatis
                                                 </div>
                                             </div>
                                         </div>
@@ -239,8 +263,10 @@
                                             <div class="form-group mb-3">
                                                 <label for="file_dok" class="form-label fw-bold">File Dokumen</label>
                                                 <div class="input-group">
-                                                    <span class="input-group-text"><i class="fas fa-file-upload"></i></span>
-                                                    <input type="file" class="form-control @error('file_dok') is-invalid @enderror"
+                                                    <span class="input-group-text"><i
+                                                            class="fas fa-file-upload"></i></span>
+                                                    <input type="file"
+                                                        class="form-control @error('file_dok') is-invalid @enderror"
                                                         id="file_dok" name="file_dok">
                                                     @error('file_dok')
                                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -254,7 +280,8 @@
                                                                 <span class="me-2">{{ $dokumenKapal->file_dok }}</span>
                                                                 <div class="btn-group ms-auto">
                                                                     <a href="{{ route('dokumen-kapal.viewDocument', $dokumenKapal->id) }}"
-                                                                        class="btn btn-sm btn-secondary me-1" target="_blank">
+                                                                        class="btn btn-sm btn-secondary me-1"
+                                                                        target="_blank">
                                                                         <i class="fas fa-eye me-1"></i>Lihat
                                                                     </a>
                                                                     <a href="{{ route('dokumen-kapal.download', $dokumenKapal->id) }}"
@@ -267,15 +294,15 @@
                                                     </div>
                                                 @endif
                                                 <div class="form-text text-muted">
-                                                    <i class="fas fa-info-circle me-1"></i>Format: PDF, JPG, JPEG, PNG. Maksimal ukuran: 5MB
+                                                    <i class="fas fa-info-circle me-1"></i>Format: PDF, JPG, JPEG, PNG.
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group h-100">
                                                 <label for="catatan" class="form-label fw-bold">Keterangan</label>
-                                                <textarea class="form-control @error('catatan') is-invalid @enderror" id="catatan"
-                                                    name="catatan" rows="4" placeholder="Tambahkan catatan atau keterangan tambahan...">{{ old('catatan', $dokumenKapal->catatan) }}</textarea>
+                                                <textarea class="form-control @error('catatan') is-invalid @enderror" id="catatan" name="catatan" rows="4"
+                                                    placeholder="Tambahkan catatan atau keterangan tambahan...">{{ old('catatan', $dokumenKapal->catatan) }}</textarea>
                                                 @error('catatan')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -285,17 +312,21 @@
                                             <label for="status_dok" class="form-label fw-bold">Status Dokumen</label>
                                             <div class="bg-light p-2 rounded">
                                                 <div class="form-check form-check-inline">
-                                                    <input class="form-check-input @error('status_dok') is-invalid @enderror"
+                                                    <input
+                                                        class="form-check-input @error('status_dok') is-invalid @enderror"
                                                         type="radio" name="status_dok" id="berlaku" value="Berlaku"
-                                                        {{ old('status_dok', $dokumenKapal->status_dok) == 'Berlaku' ? 'checked' : '' }} required>
+                                                        {{ old('status_dok', $dokumenKapal->status_dok) == 'Berlaku' ? 'checked' : '' }}
+                                                        required>
                                                     <label class="form-check-label" for="berlaku">
                                                         <i class="fas fa-check-circle text-success me-1"></i>Berlaku
                                                     </label>
                                                 </div>
 
                                                 <div class="form-check form-check-inline">
-                                                    <input class="form-check-input @error('status_dok') is-invalid @enderror"
-                                                        type="radio" name="status_dok" id="tidak_berlaku" value="Tidak Berlaku"
+                                                    <input
+                                                        class="form-check-input @error('status_dok') is-invalid @enderror"
+                                                        type="radio" name="status_dok" id="tidak_berlaku"
+                                                        value="Tidak Berlaku"
                                                         {{ old('status_dok', $dokumenKapal->status_dok) == 'Tidak Berlaku' ? 'checked' : '' }}>
                                                     <label class="form-check-label" for="tidak_berlaku">
                                                         <i class="fas fa-times-circle text-danger me-1"></i>Tidak Berlaku
@@ -371,7 +402,8 @@
                         if (!input.value) {
                             input.classList.add('is-invalid');
                             // Create error message if it doesn't exist
-                            if (!input.nextElementSibling || !input.nextElementSibling.classList.contains('invalid-feedback')) {
+                            if (!input.nextElementSibling || !input.nextElementSibling.classList
+                                .contains('invalid-feedback')) {
                                 const feedback = document.createElement('div');
                                 feedback.className = 'invalid-feedback';
                                 feedback.textContent = 'Field ini wajib diisi';
@@ -402,6 +434,50 @@
                     }
                 });
             });
+
+            const kategoriDokSelect = document.getElementById('kategori_dok');
+            const namaDokSelect = document.getElementById('nama_dok');
+
+            // Store pre-selected document name (for edit page)
+            const selectedNamaDok = namaDokSelect.value;
+
+            // Store all dokumen data organized by kategori
+            const namaDokumenByKategori = @json($namaDokumenByKategori);
+
+            // Function to filter nama dokumen based on kategori
+            function filterNamaDokumen(kategoriId) {
+                // Reset nama dokumen select
+                namaDokSelect.innerHTML = '<option value="">-- Pilih Nama Dokumen --</option>';
+
+                if (!kategoriId) return;
+
+                // Get documents for selected category
+                const dokumenList = namaDokumenByKategori[kategoriId] || [];
+
+                // Add filtered options to select element
+                dokumenList.forEach(dokumen => {
+                    const option = document.createElement('option');
+                    option.value = dokumen.id_kode;
+                    option.textContent = dokumen.nama_dok;
+
+                    // If this was previously selected, select it again
+                    if (dokumen.id_kode === selectedNamaDok) {
+                        option.selected = true;
+                    }
+
+                    namaDokSelect.appendChild(option);
+                });
+            }
+
+            // Event listener for kategori change
+            kategoriDokSelect.addEventListener('change', function() {
+                filterNamaDokumen(this.value);
+            });
+
+            // Initialize on page load if kategori is already selected
+            if (kategoriDokSelect.value) {
+                filterNamaDokumen(kategoriDokSelect.value);
+            }
 
             // Fungsi untuk menghitung dan menampilkan masa berlaku
             function hitungMasaBerlaku() {
@@ -475,7 +551,8 @@
                     if (days < 0) {
                         months--;
                         // Tambahkan hari dari bulan sebelumnya
-                        const lastDayOfMonth = new Date(expiryDate.getFullYear(), expiryDate.getMonth(), 0).getDate();
+                        const lastDayOfMonth = new Date(expiryDate.getFullYear(), expiryDate.getMonth(), 0)
+                        .getDate();
                         days += lastDayOfMonth;
                     }
 
@@ -494,6 +571,8 @@
                     masaPengingatanField.value = '-';
                 }
             }
+
+
 
             // Fungsi untuk toggle visibilitas field berdasarkan jenis masa berlaku
             function toggleFieldsVisibility() {
@@ -554,7 +633,8 @@
             toggleFieldsVisibility();
 
             // Hitung masa peringatan awal jika field sudah memiliki nilai
-            if (document.getElementById('tgl_peringatan').value && document.getElementById('tgl_berakhir_dok').value) {
+            if (document.getElementById('tgl_peringatan').value && document.getElementById('tgl_berakhir_dok')
+                .value) {
                 hitungMasaPeringatan();
             }
         });

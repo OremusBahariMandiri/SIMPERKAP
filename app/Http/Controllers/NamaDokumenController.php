@@ -100,4 +100,5 @@ class NamaDokumenController extends Controller
         return redirect()->route('nama-dokumen.index')
             ->with('success', 'Nama Dokumen berhasil dihapus.');
     }
+    
 }

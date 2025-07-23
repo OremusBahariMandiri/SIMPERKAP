@@ -161,19 +161,21 @@
                                                     mengubah password</div>
                                             </div>
 
-                                            <div class="form-group mb-3">
+                                            <div class="form-group mb-3" id="confirmation-group">
                                                 <label for="password_confirmation" class="form-label fw-bold">Konfirmasi
-                                                    Password <span class="text-danger">*</span></label>
+                                                    Password</label>
                                                 <div class="input-group password-input-group">
                                                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                                     <input type="password" class="form-control"
-                                                        id="password_confirmation" name="password_confirmation" required>
+                                                        id="password_confirmation" name="password_kry_confirmation">
                                                     <button type="button"
                                                         class="btn btn-outline-secondary password-toggle"
                                                         onclick="togglePassword('password_confirmation', 'password-eye-2')">
                                                         <i class="fas fa-eye" id="password-eye-2"></i>
                                                     </button>
                                                 </div>
+                                                <div class="form-text text-muted"><i
+                                                        class="fas fa-info-circle me-1"></i>Hanya wajib diisi jika mengubah password</div>
                                             </div>
                                         </div>
                                     </div>
@@ -284,9 +286,32 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Form validation with visual feedback
+            const passwordInput = document.getElementById('password_kry');
+            const confirmInput = document.getElementById('password_confirmation');
             const form = document.getElementById('userForm');
+
+            // Password confirmation validation
+            function validatePassword() {
+                if (passwordInput.value && passwordInput.value !== confirmInput.value) {
+                    confirmInput.setCustomValidity('Password tidak sama');
+                } else {
+                    confirmInput.setCustomValidity('');
+                }
+            }
+
+            passwordInput.addEventListener('input', validatePassword);
+            confirmInput.addEventListener('input', validatePassword);
+
+            // Form validation with visual feedback
             form.addEventListener('submit', function(event) {
+                // Custom validation for password fields
+                if (passwordInput.value && !confirmInput.value) {
+                    event.preventDefault();
+                    confirmInput.classList.add('is-invalid');
+                    confirmInput.focus();
+                    return;
+                }
+
                 if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -321,45 +346,13 @@
             });
 
             // Remove invalid class when input changes
-            document.querySelectorAll('[required]').forEach(function(input) {
+            document.querySelectorAll('input, select').forEach(function(input) {
                 input.addEventListener('input', function() {
                     if (this.value) {
                         this.classList.remove('is-invalid');
                     }
                 });
             });
-
-            // Password confirmation validation
-            const passwordInput = document.getElementById('password_kry');
-            const confirmInput = document.getElementById('password_confirmation');
-            const confirmGroup = document.getElementById('confirmation-group');
-
-            // Initially hide confirmation field if password is empty
-            if (passwordInput.value === '') {
-                confirmGroup.style.display = 'none';
-            }
-
-            // Show/hide confirmation field based on password input
-            passwordInput.addEventListener('input', function() {
-                if (this.value) {
-                    confirmGroup.style.display = 'block';
-                    confirmInput.setAttribute('required', 'required');
-                } else {
-                    confirmGroup.style.display = 'none';
-                    confirmInput.removeAttribute('required');
-                }
-            });
-
-            function validatePassword() {
-                if (passwordInput.value !== confirmInput.value) {
-                    confirmInput.setCustomValidity('Password tidak sama');
-                } else {
-                    confirmInput.setCustomValidity('');
-                }
-            }
-
-            passwordInput.addEventListener('input', validatePassword);
-            confirmInput.addEventListener('input', validatePassword);
         });
     </script>
 @endpush

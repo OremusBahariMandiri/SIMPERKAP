@@ -247,7 +247,7 @@
                                                     @enderror
                                                 </div>
                                                 <div class="form-text text-muted">
-                                                    <i class="fas fa-info-circle me-1"></i>Format: PDF, JPG, JPEG, PNG. Maksimal ukuran: 5MB
+                                                    <i class="fas fa-info-circle me-1"></i>Format: PDF, JPG, JPEG, PNG.
                                                 </div>
                                             </div>
                                         </div>
@@ -372,6 +372,50 @@
                     }
                 }
             });
+
+            const kategoriDokSelect = document.getElementById('kategori_dok');
+            const namaDokSelect = document.getElementById('nama_dok');
+
+            // Store pre-selected document name (for edit page)
+            const selectedNamaDok = namaDokSelect.value;
+
+            // Store all dokumen data organized by kategori
+            const namaDokumenByKategori = @json($namaDokumenByKategori);
+
+            // Function to filter nama dokumen based on kategori
+            function filterNamaDokumen(kategoriId) {
+                // Reset nama dokumen select
+                namaDokSelect.innerHTML = '<option value="">-- Pilih Nama Dokumen --</option>';
+
+                if (!kategoriId) return;
+
+                // Get documents for selected category
+                const dokumenList = namaDokumenByKategori[kategoriId] || [];
+
+                // Add filtered options to select element
+                dokumenList.forEach(dokumen => {
+                    const option = document.createElement('option');
+                    option.value = dokumen.id_kode;
+                    option.textContent = dokumen.nama_dok;
+
+                    // If this was previously selected, select it again
+                    if (dokumen.id_kode === selectedNamaDok) {
+                        option.selected = true;
+                    }
+
+                    namaDokSelect.appendChild(option);
+                });
+            }
+
+            // Event listener for kategori change
+            kategoriDokSelect.addEventListener('change', function() {
+                filterNamaDokumen(this.value);
+            });
+
+            // Initialize on page load if kategori is already selected
+            if (kategoriDokSelect.value) {
+                filterNamaDokumen(kategoriDokSelect.value);
+            }
 
             // Remove invalid class when input changes
             document.querySelectorAll('[required]').forEach(function(input) {

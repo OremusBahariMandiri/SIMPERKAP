@@ -44,7 +44,6 @@ class UserController extends Controller
             'jabatan_kry' => 'required',
             'wilker_kry' => 'required',
             'password_kry' => 'required|min:6|confirmed',
-            'password_confirmation' => 'required',
         ]);
 
         // Generate ID if not present
@@ -93,7 +92,6 @@ class UserController extends Controller
         // Add password validation rules if password is being updated
         if ($request->filled('password_kry')) {
             $validationRules['password_kry'] = 'required|min:6|confirmed';
-            $validationRules['password_confirmation'] = 'required';
         }
 
         $request->validate($validationRules);

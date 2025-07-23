@@ -22,7 +22,7 @@
 
     <style>
         :root {
-            --primary-color: #1270fc;
+            --primary-color: #6f6e6e;
             --primary-dark: #0a5bca;
             --primary-light: #e8f1ff;
         }
@@ -114,7 +114,7 @@
         }
 
         .login-header h2 {
-            color: black;
+            color: #6f6e6e;
             font-weight: 600;
             margin-bottom: 0.5rem;
         }
@@ -360,7 +360,7 @@
 
 
                     <div class="form-group">
-                        <button type="submit" class="btn btn-dark w-100">
+                        <button type="submit" class="btn btn-secondary w-100">
                             <i class="fas fa-sign-in-alt me-2"></i> Masuk
                         </button>
                     </div>

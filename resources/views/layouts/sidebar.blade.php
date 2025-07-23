@@ -118,20 +118,20 @@
                     </a>
                 </li>
                 @endif
-            </ul>
 
-            {{-- Bagian bawah sidebar (opsional) --}}
-            <div class="sidebar-heading mt-4">Lainnya</div>
-            <ul class="nav flex-column">
+                @if(Auth::user()->is_admin || Auth::user()->hasAccess('dokumen_kapal'))
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('logout') }}"
-                       onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="nav-text">Logout</span>
+                    <a class="nav-link {{ request()->is('ship-particular*') && !request()->is('ship-particular/monitoring*') ? 'active' : '' }}" href="{{ route('ship-particular.index') }}">
+                        <i class="fas fa-file-invoice"></i>
+                        <span class="nav-text">Ship Particular</span>
                     </a>
-                    <form id="logout-form-sidebar" action="{{ route('logout') }}" method="POST" class="d-none">
-                        @csrf
-                    </form>
+                </li>
+                @endif
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('settings.index') && !request()->is('settings.index') ? 'active' : '' }}" href="{{ route('settings.index') }}">
+                        <i class="fas fa-user"></i>
+                        <span class="nav-text">Pengaturan</span>
+                    </a>
                 </li>
             </ul>
         </div>

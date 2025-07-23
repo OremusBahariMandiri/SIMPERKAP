@@ -37,7 +37,8 @@ class UserAccessController extends Controller
             'kapal' => 'Kapal',
             'kategori_dokumen' => 'Kategori Dokumen',
             'nama_dokumen' => 'Nama Dokumen',
-            'dokumen_kapal' => 'Dokumen Kapal'
+            'dokumen_kapal' => 'Dokumen Kapal',
+            'ship_particular' => 'Ship Particular'
         ];
 
         // Prepare user access data

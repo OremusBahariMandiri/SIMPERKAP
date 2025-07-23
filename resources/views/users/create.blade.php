@@ -151,7 +151,8 @@
                                                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                                     <input type="password" class="form-control" id="password_kry"
                                                         name="password_kry" required>
-                                                    <button type="button" class="btn btn-outline-secondary password-toggle"
+                                                    <button type="button"
+                                                        class="btn btn-outline-secondary password-toggle"
                                                         onclick="togglePassword('password_kry', 'password-eye-1')">
                                                         <i class="fas fa-eye" id="password-eye-1"></i>
                                                     </button>
@@ -166,8 +167,10 @@
                                                 <div class="input-group password-input-group">
                                                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                                     <input type="password" class="form-control"
-                                                        id="password_confirmation" name="password_confirmation" required>
-                                                    <button type="button" class="btn btn-outline-secondary password-toggle"
+                                                        id="password_confirmation" name="password_kry_confirmation"
+                                                        required>
+                                                    <button type="button"
+                                                        class="btn btn-outline-secondary password-toggle"
                                                         onclick="togglePassword('password_confirmation', 'password-eye-2')">
                                                         <i class="fas fa-eye" id="password-eye-2"></i>
                                                     </button>

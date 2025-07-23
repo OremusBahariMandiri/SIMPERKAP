@@ -637,7 +637,7 @@
                         const today = moment();
 
                         if (berakhirDate.isAfter(today) && berakhirDate.isBefore(moment().add(30,
-                            'days'))) {
+                                'days'))) {
                             row.addClass('highlight-yellow');
                             if (!isExpired && !isWarning) {
                                 warningCount++;
@@ -1123,6 +1123,45 @@
                 if (detailLink) {
                     window.location.href = detailLink;
                 }
+            });
+
+            $(`
+    <form id="exportForm" action="{{ route('dokumen-kapal.export-excel') }}" method="POST" class="d-none">
+        @csrf
+        <input type="hidden" name="filter_noreg" id="export_filter_noreg">
+        <input type="hidden" name="filter_kapal" id="export_filter_kapal">
+        <input type="hidden" name="filter_kategori" id="export_filter_kategori">
+        <input type="hidden" name="filter_nama_dok" id="export_filter_nama_dok">
+        <input type="hidden" name="filter_tgl_terbit_from" id="export_filter_tgl_terbit_from">
+        <input type="hidden" name="filter_tgl_terbit_to" id="export_filter_tgl_terbit_to">
+        <input type="hidden" name="filter_tgl_berakhir_from" id="export_filter_tgl_berakhir_from">
+        <input type="hidden" name="filter_tgl_berakhir_to" id="export_filter_tgl_berakhir_to">
+        <input type="hidden" name="filter_status" id="export_filter_status">
+    </form>
+    `).insertAfter('#dokumenKapalTable');
+
+            // Update event handler untuk tombol Export Excel
+            $('#exportExcel').on('click', function() {
+                // Salin nilai filter saat ini ke form export
+                $('#export_filter_noreg').val($('#filter_noreg').val());
+                $('#export_filter_kapal').val($('#filter_kapal').val());
+                $('#export_filter_kategori').val($('#filter_kategori').val());
+                $('#export_filter_nama_dok').val($('#filter_nama_dok').val());
+                $('#export_filter_tgl_terbit_from').val($('#filter_tgl_terbit_from').val());
+                $('#export_filter_tgl_terbit_to').val($('#filter_tgl_terbit_to').val());
+                $('#export_filter_tgl_berakhir_from').val($('#filter_tgl_berakhir_from').val());
+                $('#export_filter_tgl_berakhir_to').val($('#filter_tgl_berakhir_to').val());
+
+                // Konversi status visual ke nilai filter
+                let statusFilter = '';
+                if ($('#filter_status').val() === 'Valid') statusFilter = 'Valid';
+                else if ($('#filter_status').val() === 'Warning') statusFilter = 'Warning';
+                else if ($('#filter_status').val() === 'Expired') statusFilter = 'Expired';
+                $('#export_filter_status').val(statusFilter);
+
+                // Submit form export
+                $('#exportForm').submit();
+                $('#exportModal').modal('hide');
             });
 
             // Tambahkan efek flash saat baris di-hover

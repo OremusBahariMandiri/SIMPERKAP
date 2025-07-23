@@ -47,7 +47,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('nama-dokumen', NamaDokumenController::class);
     Route::resource('dokumen-kapal', DokumenKapalController::class);
     Route::resource('ship-particular', ShipParticularController::class);
-    
+
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     // Tambahan route untuk dokumen kapal
     Route::get('dokumen-kapal/{dokumenKapal}/download', [DokumenKapalController::class, 'download'])->name('dokumen-kapal.download');
@@ -68,4 +68,7 @@ Route::middleware(['auth'])->group(function () {
     // Settings routes
     Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings/update-password', [App\Http\Controllers\SettingsController::class, 'updatePassword'])->name('settings.update-password');
+    // Tambahkan route berikut ke routes/web.php
+
+    Route::post('/dokumen-kapal/export-excel', [DokumenKapalController::class, 'exportExcel'])->name('dokumen-kapal.export-excel');
 });

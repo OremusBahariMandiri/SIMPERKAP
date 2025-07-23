@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\DokumenKapalExport;
 use App\Models\DokumenKapal;
 use App\Models\Kapal;
 use App\Models\KategoriDokumen;
@@ -10,6 +11,7 @@ use App\Traits\GenerateIdTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DokumenKapalController extends Controller
 {
@@ -476,5 +478,103 @@ class DokumenKapalController extends Controller
 
         // Jika file tidak dapat dipreview, redirect ke download
         return redirect()->route('dokumen-kapal.download', $dokumenKapal);
+    }
+
+    // Tambahkan method berikut ke DokumenKapalController.php
+
+
+    /**
+     * Export dokumen kapal ke Excel berdasarkan filter
+     */
+    public function exportExcel(Request $request)
+    {
+        // Ambil parameter filter
+        $filters = [
+            'noreg' => $request->filter_noreg,
+            'kapal' => $request->filter_kapal,
+            'kategori' => $request->filter_kategori,
+            'nama_dok' => $request->filter_nama_dok,
+            'tgl_terbit_from' => $request->filter_tgl_terbit_from,
+            'tgl_terbit_to' => $request->filter_tgl_terbit_to,
+            'tgl_berakhir_from' => $request->filter_tgl_berakhir_from,
+            'tgl_berakhir_to' => $request->filter_tgl_berakhir_to,
+            'status' => $request->filter_status,
+        ];
+
+        // Query data berdasarkan filter
+        $query = DokumenKapal::with(['kapal', 'kategoriDokumen', 'namaDokumen']);
+
+        // Filter No Registrasi
+        if ($request->filled('filter_noreg')) {
+            $query->where('no_reg', 'like', '%' . $request->filter_noreg . '%');
+        }
+
+        // Filter Kapal
+        if ($request->filled('filter_kapal')) {
+            $query->whereHas('kapal', function ($q) use ($request) {
+                $q->where('nama_kpl', $request->filter_kapal);
+            });
+        }
+
+        // Filter Kategori
+        if ($request->filled('filter_kategori')) {
+            $query->whereHas('kategoriDokumen', function ($q) use ($request) {
+                $q->where('kategori_dok', $request->filter_kategori);
+            });
+        }
+
+        // Filter Nama Dokumen
+        if ($request->filled('filter_nama_dok')) {
+            $query->whereHas('namaDokumen', function ($q) use ($request) {
+                $q->where('nama_dok', $request->filter_nama_dok);
+            });
+        }
+
+        // Filter Tanggal Terbit
+        if ($request->filled('filter_tgl_terbit_from')) {
+            $query->where('tgl_terbit_dok', '>=', $request->filter_tgl_terbit_from);
+        }
+        if ($request->filled('filter_tgl_terbit_to')) {
+            $query->where('tgl_terbit_dok', '<=', $request->filter_tgl_terbit_to);
+        }
+
+        // Filter Tanggal Berakhir
+        if ($request->filled('filter_tgl_berakhir_from')) {
+            $query->where('tgl_berakhir_dok', '>=', $request->filter_tgl_berakhir_from);
+        }
+        if ($request->filled('filter_tgl_berakhir_to')) {
+            $query->where('tgl_berakhir_dok', '<=', $request->filter_tgl_berakhir_to);
+        }
+
+        // Filter Status Dokumen
+        if ($request->filled('filter_status')) {
+            if ($request->filter_status === 'Valid') {
+                $query->where('status_dok', 'Berlaku')
+                    ->where(function ($q) {
+                        $q->whereNull('tgl_berakhir_dok')
+                            ->orWhere('tgl_berakhir_dok', '>', now()->addDays(30));
+                    });
+            } else if ($request->filter_status === 'Warning') {
+                $query->where('status_dok', 'Berlaku')
+                    ->where('tgl_berakhir_dok', '>', now())
+                    ->where('tgl_berakhir_dok', '<=', now()->addDays(30));
+            } else if ($request->filter_status === 'Expired') {
+                $query->where(function ($q) {
+                    $q->where('status_dok', 'Tidak Berlaku')
+                        ->orWhere(function ($subq) {
+                            $subq->whereNotNull('tgl_berakhir_dok')
+                                ->where('tgl_berakhir_dok', '<', now());
+                        });
+                });
+            }
+        }
+
+        $dokumenKapal = $query->get();
+
+        // Format tanggal untuk nama file
+        $currentDate = now()->format('d-m-Y_H-i-s');
+        $fileName = 'Dokumen_Kapal_' . $currentDate . '.xlsx';
+
+        return Excel::download(new DokumenKapalExport($dokumenKapal, $filters), $fileName);
     }
 }

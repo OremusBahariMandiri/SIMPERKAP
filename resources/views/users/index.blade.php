@@ -77,8 +77,9 @@
                                                     </a>
                                                     <button type="button" class="btn btn-sm btn-danger delete-confirm"
                                                         data-bs-toggle="tooltip" title="Hapus"
-                                                        data-id="{{ $user->id }}" data-name="{{ $user->nama_kry }}"
-                                                        data-url="{{ route('users.destroy', $user->id) }}">
+                                                        data-id="{{ $user->id }}"
+                                                        data-name="{{ $user->nama_kry }}"
+                                                        data-bs-toggle="tooltip" title="Hapus">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>
@@ -95,25 +96,26 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel"
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel"
         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="deleteConfirmModalLabel"><i class="fas fa-trash me-2"></i>Konfirmasi Hapus
+                    <h5 class="modal-title" id="deleteConfirmationModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Konfirmasi Hapus
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Apakah Anda yakin ingin menghapus pengguna: <strong id="userName"></strong>?</p>
-                    <p class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Tindakan ini tidak dapat
-                        dibatalkan!</p>
+                    <p>Apakah Anda yakin ingin menghapus pengguna <strong id="userNameToDelete"></strong>?</p>
+                    <p class="text-danger"><i class="fas fa-info-circle me-1"></i>Tindakan ini tidak dapat dibatalkan!</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-times me-1"></i>Batal
                     </button>
-                    <form id="deleteForm" method="POST" style="display: inline;">
+                    <form id="deleteForm" method="POST">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">
@@ -232,10 +234,23 @@
 @endpush
 
 @push('scripts')
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap5.min.js"></script>
+
     <script>
         $(document).ready(function() {
-            // Gunakan instance DataTable yang sudah ada, jangan menginisialisasi ulang
-            var table = $('#usersTable').DataTable();
+            // Inisialisasi DataTables jika belum ada
+            if (!$.fn.DataTable.isDataTable('#usersTable')) {
+                $('#usersTable').DataTable({
+                    responsive: true,
+                    language: {
+                        url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                    }
+                });
+            }
 
             // Initialize tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -247,13 +262,15 @@
             $('.delete-confirm').on('click', function() {
                 var id = $(this).data('id');
                 var name = $(this).data('name');
-                var url = $(this).data('url');
 
-                $('#itemNameToDelete').text(name);
-                $('#deleteForm').attr('action', url);
+                // Set user name in modal
+                $('#userNameToDelete').text(name);
 
-                var deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
-                deleteModal.show();
+                // Set form action URL with explicit URL construction
+                $('#deleteForm').attr('action', "{{ url('users') }}/" + id);
+
+                // Show modal
+                $('#deleteConfirmationModal').modal('show');
             });
 
             // Tambahkan efek klik pada baris tabel untuk menuju halaman detail

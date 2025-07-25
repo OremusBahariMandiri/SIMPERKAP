@@ -9,9 +9,16 @@ use App\Http\Controllers\KapalController;
 use App\Http\Controllers\KategoriDokumenController;
 use App\Http\Controllers\NamaDokumenController;
 use App\Http\Controllers\DokumenKapalController;
+use App\Http\Controllers\GolonganBarangController;
+use App\Http\Controllers\JenisBarangController;
+use App\Http\Controllers\KategoriBarangController;
+use App\Http\Controllers\NamaBarangController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShipParticularController;
+use App\Http\Controllers\ShipParticularsController;
 use App\Http\Controllers\UserAccessController;
+use App\Models\GolonganBarang;
+use App\Models\NamaBarang;
 use App\Models\ShipParticular;
 use Illuminate\Support\Facades\Auth;
 
@@ -47,8 +54,14 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('nama-dokumen', NamaDokumenController::class);
     Route::resource('dokumen-kapal', DokumenKapalController::class);
     Route::resource('ship-particular', ShipParticularController::class);
+    Route::resource('golongan-barang', GolonganBarangController::class);
+    Route::resource('kategori-barang', KategoriBarangController::class);
+    Route::resource('jenis-barang', JenisBarangController::class);
+    Route::resource('nama-barang', NamaBarangController::class);
+
 
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
     // Tambahan route untuk dokumen kapal
     Route::get('dokumen-kapal/{dokumenKapal}/download', [DokumenKapalController::class, 'download'])->name('dokumen-kapal.download');
     Route::get('ship-particular/{id}/download', [ShipParticularController::class, 'downloadFile'])

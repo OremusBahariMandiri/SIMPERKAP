@@ -106,6 +106,7 @@
                                                     {{ isset($userAccess[$key]['monitoring']) && $userAccess[$key]['monitoring'] ? 'checked' : '' }}>
                                             </div>
                                         </td>
+                                        
                                     </tr>
                                     @endforeach
                                 </tbody>

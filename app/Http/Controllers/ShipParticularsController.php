@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\ShipParticular;
 use App\Models\Kapal;
+use App\Models\UserAccess;
 use App\Traits\GenerateIdTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
-class ShipParticularController extends Controller
+class ShipParticularsController extends Controller
 {
     use GenerateIdTrait;
 
@@ -178,34 +179,32 @@ class ShipParticularController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    /**
-     * Remove the specified resource from storage.
-     */
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
+    public function destroy(ShipParticular $shipParticular)
     {
-        $shipParticular = ShipParticular::findOrFail($id);
+        // $shipParticular = ShipParticular::findOrFail($id);
 
-        // Simpan path file untuk dihapus jika ada
-        $filePath = $shipParticular->file_dok;
+        // try {
+        //     // Delete associated file
+        //     if ($shipParticular->file_dok && Storage::disk('public')->exists($shipParticular->file_dok)) {
+        //         Storage::disk('public')->delete($shipParticular->file_dok);
+        //     }
 
-        try {
-            // Hapus data dari database
-            $shipParticular->delete();
+        //     $shipParticular->delete();
 
-            // Hapus file jika ada
-            if ($filePath && Storage::disk('public')->exists($filePath)) {
-                Storage::disk('public')->delete($filePath);
-            }
+        //     return redirect()->route('ship-particular.index')
+        //         ->with('success', 'Data Ship Particular berhasil dihapus');
+        // } catch (\Exception $e) {
+        //     return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        // }
 
-            return redirect()->route('ship-particular.index')
-                ->with('success', 'Data Ship Particular berhasil dihapus');
-        } catch (\Exception $e) {
-            return back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
+        // Delete user access
+        UserAccess::where('id_kode_a01', $shipParticular->id_kode)->delete();
+
+        // Delete user
+        $shipParticular->delete();
+
+        return redirect()->route('ship-particular.index')
+            ->with('success', 'Ship Particular berhasil dihapus.');
     }
 
     /**

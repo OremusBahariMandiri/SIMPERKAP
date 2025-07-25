@@ -106,6 +106,38 @@
                             </a>
                         </li>
                         @endif
+                        {{-- @if(Auth::user()->is_admin || Auth::user()->hasAccess('golongan_barang'))
+                        <li class="nav-item">
+                            <a class="submenu-link {{ request()->is('golongan-barang*') ? 'active' : '' }}" href="{{ route('golongan-barang.index') }}">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Golongan Barang</span>
+                            </a>
+                        </li>
+                        @endif
+                        @if(Auth::user()->is_admin || Auth::user()->hasAccess('kategori_barang'))
+                        <li class="nav-item">
+                            <a class="submenu-link {{ request()->is('kategori-barang*') ? 'active' : '' }}" href="{{ route('kategori-barang.index') }}">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Kategori Barang</span>
+                            </a>
+                        </li>
+                        @endif
+                        @if(Auth::user()->is_admin || Auth::user()->hasAccess('jenis_barang'))
+                        <li class="nav-item">
+                            <a class="submenu-link {{ request()->is('jenis-barang*') ? 'active' : '' }}" href="{{ route('jenis-barang.index') }}">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Jenis Barang</span>
+                            </a>
+                        </li>
+                        @endif
+                        @if(Auth::user()->is_admin || Auth::user()->hasAccess('nama_barang'))
+                        <li class="nav-item">
+                            <a class="submenu-link {{ request()->is('nama-barang*') ? 'active' : '' }}" href="{{ route('jenis-barang.index') }}">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Nama Barang</span>
+                            </a>
+                        </li>
+                        @endif --}}
                     </ul>
                 </li>
 
@@ -119,7 +151,7 @@
                 </li>
                 @endif
 
-                @if(Auth::user()->is_admin || Auth::user()->hasAccess('dokumen_kapal'))
+                @if(Auth::user()->is_admin || Auth::user()->hasAccess('ship_particular'))
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('ship-particular*') && !request()->is('ship-particular/monitoring*') ? 'active' : '' }}" href="{{ route('ship-particular.index') }}">
                         <i class="fas fa-file-invoice"></i>

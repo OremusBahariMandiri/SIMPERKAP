@@ -10,6 +10,7 @@ use App\Http\Controllers\KategoriDokumenController;
 use App\Http\Controllers\NamaDokumenController;
 use App\Http\Controllers\DokumenKapalController;
 use App\Http\Controllers\GolonganBarangController;
+use App\Http\Controllers\InventarisKapalController;
 use App\Http\Controllers\JenisBarangController;
 use App\Http\Controllers\KategoriBarangController;
 use App\Http\Controllers\NamaBarangController;
@@ -58,6 +59,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('kategori-barang', KategoriBarangController::class);
     Route::resource('jenis-barang', JenisBarangController::class);
     Route::resource('nama-barang', NamaBarangController::class);
+    Route::resource('inventaris-kapal', InventarisKapalController::class);
 
 
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');

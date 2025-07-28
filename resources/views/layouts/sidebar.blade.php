@@ -106,7 +106,7 @@
                             </a>
                         </li>
                         @endif
-                        {{-- @if(Auth::user()->is_admin || Auth::user()->hasAccess('golongan_barang'))
+                        @if(Auth::user()->is_admin || Auth::user()->hasAccess('golongan_barang'))
                         <li class="nav-item">
                             <a class="submenu-link {{ request()->is('golongan-barang*') ? 'active' : '' }}" href="{{ route('golongan-barang.index') }}">
                                 <i class="fas fa-file-alt"></i>
@@ -137,7 +137,7 @@
                                 <span>Nama Barang</span>
                             </a>
                         </li>
-                        @endif --}}
+                        @endif
                     </ul>
                 </li>
 
@@ -159,6 +159,16 @@
                     </a>
                 </li>
                 @endif
+
+                @if(Auth::user()->is_admin || Auth::user()->hasAccess('inventaris_kapal'))
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('inventaris-kapal*') && !request()->is('inventaris-kapal/monitoring*') ? 'active' : '' }}" href="{{ route('inventaris-kapal.index') }}">
+                        <i class="fas fa-file-invoice"></i>
+                        <span class="nav-text">Inventaris Kapal</span>
+                    </a>
+                </li>
+                @endif
+
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('settings.index') && !request()->is('settings.index') ? 'active' : '' }}" href="{{ route('settings.index') }}">
                         <i class="fas fa-gear"></i>

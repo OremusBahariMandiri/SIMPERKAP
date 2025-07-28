@@ -168,19 +168,39 @@ CREATE TABLE b03_Inventaris_Kpl (
     created_at TIMESTAMP NULL DEFAULT NULL,
     updated_at TIMESTAMP NULL DEFAULT NULL,
 
-    INDEX idx_nama_kpl (nama_kpl),
+    INDEX idx_id_kode_a05 (id_kode_a05),
+    INDEX idx_id_kode_a11 (id_kode_a11),
+    INDEX idx_id_kode_a08 (id_kode_a08),
+    INDEX idx_id_kode_a09 (id_kode_a09),
+    INDEX idx_id_kode_a10 (id_kode_a10),
     INDEX idx_created_by (created_by),
     INDEX idx_updated_by (updated_by),
 
-    CONSTRAINT fk_b02_nama_kpl
-        FOREIGN KEY (nama_kpl) REFERENCES a05_dm_kapal(id_kode)
+    CONSTRAINT fk_b03_kapal
+        FOREIGN KEY (id_kode_a05) REFERENCES a05_dm_kapal(id_kode)
         ON DELETE CASCADE ON UPDATE CASCADE,
 
-    CONSTRAINT fk_b02_created_by
+    CONSTRAINT fk_b03_namabarang
+        FOREIGN KEY (id_kode_a11) REFERENCES a11_dm_nama_brg(id_kode)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_b03_kategoribrg
+        FOREIGN KEY (id_kode_a08) REFERENCES a08_dm_kategori_brg(id_kode)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_b03_jenisbrg
+        FOREIGN KEY (id_kode_a09) REFERENCES a09_dm_jenis_brg(id_kode)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+        CONSTRAINT fk_b03_golonganbrg
+        FOREIGN KEY (id_kode_a10) REFERENCES a10_dm_golongan_brg(id_kode)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_b03_created_by
         FOREIGN KEY (created_by) REFERENCES a01_dm_users(id_kode)
         ON DELETE SET NULL ON UPDATE CASCADE,
 
-    CONSTRAINT fk_b02_updated_by
+    CONSTRAINT fk_b03_updated_by
         FOREIGN KEY (updated_by) REFERENCES a01_dm_users(id_kode)
         ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

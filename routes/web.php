@@ -63,7 +63,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-
+    Route::get('/get-nama-barang-data/{id}', [App\Http\Controllers\InventarisKapalController::class, 'getNamaBarangData'])->name('get-nama-barang-data');
     // Tambahan route untuk dokumen kapal
     Route::get('dokumen-kapal/{dokumenKapal}/download', [DokumenKapalController::class, 'download'])->name('dokumen-kapal.download');
     Route::get('ship-particular/{id}/download', [ShipParticularController::class, 'downloadFile'])

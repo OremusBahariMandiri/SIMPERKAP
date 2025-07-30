@@ -13,16 +13,16 @@ class InventarisKapal extends Model
 
     protected $fillable = [
         'id_kode',
-        'id_kode_05',
-        'id_kode_11',
-        'id_kode_08',
-        'id_kode_09',
-        'id_kode_10',
+        'id_kode_a05',  // Changed from id_kode_05 to match database column
+        'id_kode_a11',  // Changed from id_kode_11 to match database column
+        'id_kode_a08',  // Changed from id_kode_08 to match database column
+        'id_kode_a09',  // Changed from id_kode_09 to match database column
+        'id_kode_a10',  // Changed from id_kode_10 to match database column
         'no_kode_brg',
         'no_kode_brg_subtitusi',
         'tipe_brg',
         'spesifikasi_brg',
-    'satuan_brg',
+        'satuan_brg',
         'merek_brg',
         'supplier_brg',
         'lokasi_brg',
@@ -46,7 +46,7 @@ class InventarisKapal extends Model
 
     public function namaBarang()
     {
-        return $this->belongsTo(namaBarang::class, 'id_kode_a11', 'id_kode');
+        return $this->belongsTo(NamaBarang::class, 'id_kode_a11', 'id_kode');
     }
 
     public function kategoriBarang()
@@ -56,19 +56,18 @@ class InventarisKapal extends Model
 
     public function jenisBarang()
     {
-        return $this->belongsTo(jenisBarang::class, 'id_kode_a09', 'id_kode');
+        return $this->belongsTo(JenisBarang::class, 'id_kode_a09', 'id_kode');
     }
 
     public function golonganBarang()
     {
-        return $this->belongsTo(golonganBarang::class, 'id_kode_a10', 'id_kode');
+        return $this->belongsTo(GolonganBarang::class, 'id_kode_a10', 'id_kode');
     }
 
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by', 'id_kode');
     }
-
 
     public function updater()
     {

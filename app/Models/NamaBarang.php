@@ -62,4 +62,6 @@ class NamaBarang extends Model
     {
         return $this->belongsTo(User::class, 'updated_by', 'id_kode');
     }
+
+    
 }

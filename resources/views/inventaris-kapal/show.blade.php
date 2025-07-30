@@ -24,7 +24,7 @@
                         </div>
                         <div class="card-body">
                             <div class="row mb-3">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <label class="info-label fw-bold">Kapal</label>
                                     <div class="info-value">
                                         <div class="input-group">
@@ -35,7 +35,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-12 mt-2">
                                     <label class="info-label fw-bold">Nama Barang</label>
                                     <div class="info-value">
                                         <div class="input-group">
@@ -49,7 +49,7 @@
                             </div>
 
                             <div class="row mb-3">
-                                <div class="col-md-4">
+                                <div class="col-md-12">
                                     <label class="info-label fw-bold">Kategori Barang</label>
                                     <div class="info-value">
                                         <div class="input-group">
@@ -60,7 +60,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-12 mt-2">
                                     <label class="info-label fw-bold">Jenis Barang</label>
                                     <div class="info-value">
                                         <div class="input-group">
@@ -71,7 +71,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-12 mt-2">
                                     <label class="info-label fw-bold">Golongan Barang</label>
                                     <div class="info-value">
                                         <div class="input-group">
@@ -85,7 +85,7 @@
                             </div>
 
                             <div class="row mb-3">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <label class="info-label fw-bold">Kode Barang</label>
                                     <div class="info-value">
                                         <div class="input-group">
@@ -96,7 +96,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-12 mt-2">
                                     <label class="info-label fw-bold">Kode Barang Substitusi</label>
                                     <div class="info-value">
                                         <div class="input-group">
@@ -117,7 +117,7 @@
                         </div>
                         <div class="card-body">
                             <div class="row mb-3">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <label class="info-label fw-bold">Tipe/Model</label>
                                     <div class="info-value">
                                         <div class="input-group">
@@ -128,7 +128,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-12 mt-2">
                                     <label class="info-label fw-bold">Merek</label>
                                     <div class="info-value">
                                         <div class="input-group">
@@ -154,7 +154,7 @@
                             </div>
 
                             <div class="row mb-3">
-                                <div class="col-md-4">
+                                <div class="col-md-12">
                                     <label class="info-label fw-bold">Satuan</label>
                                     <div class="info-value">
                                         <div class="input-group">
@@ -165,7 +165,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-12 mt-2">
                                     <label class="info-label fw-bold">Supplier</label>
                                     <div class="info-value">
                                         <div class="input-group">
@@ -176,7 +176,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-12 mt-2">
                                     <label class="info-label fw-bold">Lokasi</label>
                                     <div class="info-value">
                                         <div class="input-group">
@@ -338,81 +338,8 @@
                         </div>
                     @endif
 
-                    <div class="card border-secondary mb-4">
-                        <div class="card-header bg-secondary bg-opacity-25 text-dark">
-                            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Informasi Sistem</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="info-label fw-bold">Dibuat Oleh</label>
-                                    <div class="info-value">
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="fas fa-user-plus"></i></span>
-                                            <div class="form-control bg-light">
-                                                {{ $inventarisKapal->creator->name ?? 'Sistem' }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="info-label fw-bold">Terakhir Diubah Oleh</label>
-                                    <div class="info-value">
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="fas fa-user-edit"></i></span>
-                                            <div class="form-control bg-light">
-                                                {{ $inventarisKapal->updater->name ?? 'Belum pernah diubah' }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <label class="info-label fw-bold">Dibuat Pada</label>
-                                    <div class="info-value">
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="fas fa-calendar-plus"></i></span>
-                                            <div class="form-control bg-light">
-                                                {{ $inventarisKapal->created_at->format('d/m/Y H:i') }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="info-label fw-bold">Terakhir Diubah Pada</label>
-                                    <div class="info-value">
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
-                                            <div class="form-control bg-light">
-                                                @if($inventarisKapal->updated_at != $inventarisKapal->created_at)
-                                                    {{ $inventarisKapal->updated_at->format('d/m/Y H:i') }}
-                                                @else
-                                                    Belum pernah diubah
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <a href="{{ route('inventaris-kapal.edit', $inventarisKapal->id_kode) }}" class="btn btn-warning w-100">
-                                <i class="fas fa-edit me-2"></i>Edit Data
-                            </a>
-                        </div>
-                        <div class="col-md-6">
-                            <button type="button" class="btn btn-danger w-100 delete-confirm"
-                                data-id="{{ $inventarisKapal->id_kode }}"
-                                data-name="{{ $inventarisKapal->namaBarang->nama_brg ?? 'Inventaris' }}"
-                                data-url="{{ route('inventaris-kapal.destroy', $inventarisKapal->id_kode) }}">
-                                <i class="fas fa-trash-alt me-2"></i>Hapus Data
-                            </button>
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
         </div>

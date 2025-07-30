@@ -12,6 +12,7 @@ use App\Traits\GenerateIdTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class InventarisKapalController extends Controller
 {
@@ -105,13 +106,14 @@ class InventarisKapalController extends Controller
             $id_kode = $request->id_kode;
         }
 
+        // Fix: Map form field names to database column names correctly
         $data = [
             'id_kode' => $id_kode,
-            'id_kode_05' => $request->id_kode_05,
-            'id_kode_11' => $request->id_kode_11,
-            'id_kode_08' => $request->id_kode_08,
-            'id_kode_09' => $request->id_kode_09,
-            'id_kode_10' => $request->id_kode_10,
+            'id_kode_a05' => $request->id_kode_05, // Changed to match database column
+            'id_kode_a11' => $request->id_kode_11, // Changed to match database column
+            'id_kode_a08' => $request->id_kode_08, // Changed to match database column
+            'id_kode_a09' => $request->id_kode_09, // Changed to match database column
+            'id_kode_a10' => $request->id_kode_10, // Changed to match database column
             'no_kode_brg' => $request->no_kode_brg,
             'no_kode_brg_subtitusi' => $request->no_kode_brg_subtitusi,
             'tipe_brg' => $request->tipe_brg,
@@ -220,12 +222,13 @@ class InventarisKapalController extends Controller
             'file_dok.max' => 'Ukuran file maksimal 2MB',
         ]);
 
+        // Fix: Map form field names to database column names correctly
         $data = [
-            'id_kode_05' => $request->id_kode_05,
-            'id_kode_11' => $request->id_kode_11,
-            'id_kode_08' => $request->id_kode_08,
-            'id_kode_09' => $request->id_kode_09,
-            'id_kode_10' => $request->id_kode_10,
+            'id_kode_a05' => $request->id_kode_05, // Changed to match database column
+            'id_kode_a11' => $request->id_kode_11, // Changed to match database column
+            'id_kode_a08' => $request->id_kode_08, // Changed to match database column
+            'id_kode_a09' => $request->id_kode_09, // Changed to match database column
+            'id_kode_a10' => $request->id_kode_10, // Changed to match database column
             'no_kode_brg' => $request->no_kode_brg,
             'no_kode_brg_subtitusi' => $request->no_kode_brg_subtitusi,
             'tipe_brg' => $request->tipe_brg,
@@ -288,6 +291,94 @@ class InventarisKapalController extends Controller
                 ->with('success', 'Data Inventaris Kapal berhasil dihapus');
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function getNamaBarangData($id)
+    {
+        try {
+            // Log the request for debugging
+            Log::info('Fetching NamaBarang data for ID: ' . $id);
+
+            // Find the NamaBarang record by id_kode
+            $namaBarang = NamaBarang::where('id_kode', $id)->first();
+
+            if (!$namaBarang) {
+                Log::warning('NamaBarang not found with ID: ' . $id);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nama Barang tidak ditemukan'
+                ], 404);
+            }
+
+            // Log found record
+            Log::info('Found NamaBarang: ' . $namaBarang->nama_brg);
+
+            // Get foreign key values
+            $idKategori = $namaBarang->id_kode_a08;
+            $idJenis = $namaBarang->id_kode_a09;
+            $idGolongan = $namaBarang->id_kode_a10;
+
+            // Find related records
+            $kategoriBarang = null;
+            $jenisBarang = null;
+            $golonganBarang = null;
+
+            if ($idKategori) {
+                $kategoriBarang = KategoriBarang::where('id_kode', $idKategori)->first();
+            }
+
+            if ($idJenis) {
+                $jenisBarang = JenisBarang::where('id_kode', $idJenis)->first();
+            }
+
+            if ($idGolongan) {
+                $golonganBarang = GolonganBarang::where('id_kode', $idGolongan)->first();
+            }
+
+            // Prepare response data
+            $responseData = [
+                'id_kode' => $namaBarang->id_kode,
+                'nama_brg' => $namaBarang->nama_brg,
+                'id_kode_a08' => $idKategori,
+                'id_kode_a09' => $idJenis,
+                'id_kode_a10' => $idGolongan
+            ];
+
+            // Add related data if available
+            if ($kategoriBarang) {
+                $responseData['kategori_barang'] = [
+                    'id_kode' => $kategoriBarang->id_kode,
+                    'kategori_brg' => $kategoriBarang->kategori_brg
+                ];
+            }
+
+            if ($jenisBarang) {
+                $responseData['jenis_barang'] = [
+                    'id_kode' => $jenisBarang->id_kode,
+                    'jenis_brg' => $jenisBarang->jenis_brg
+                ];
+            }
+
+            if ($golonganBarang) {
+                $responseData['golongan_barang'] = [
+                    'id_kode' => $golonganBarang->id_kode,
+                    'golongan_brg' => $golonganBarang->golongan_brg
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'namaBarang' => $responseData
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in getNamaBarangData: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

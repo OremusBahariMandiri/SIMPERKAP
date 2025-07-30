@@ -106,38 +106,42 @@
                             </a>
                         </li>
                         @endif
-                        @if(Auth::user()->is_admin || Auth::user()->hasAccess('golongan_barang'))
+                        {{-- Golongan Barang - Icon Diubah --}}
+                        {{-- @if(Auth::user()->is_admin || Auth::user()->hasAccess('golongan_barang'))
                         <li class="nav-item">
                             <a class="submenu-link {{ request()->is('golongan-barang*') ? 'active' : '' }}" href="{{ route('golongan-barang.index') }}">
-                                <i class="fas fa-file-alt"></i>
+                                <i class="fas fa-boxes"></i>
                                 <span>Golongan Barang</span>
                             </a>
                         </li>
-                        @endif
-                        @if(Auth::user()->is_admin || Auth::user()->hasAccess('kategori_barang'))
+                        @endif --}}
+                        {{-- Kategori Barang - Icon Diubah --}}
+                        {{-- @if(Auth::user()->is_admin || Auth::user()->hasAccess('kategori_barang'))
                         <li class="nav-item">
                             <a class="submenu-link {{ request()->is('kategori-barang*') ? 'active' : '' }}" href="{{ route('kategori-barang.index') }}">
-                                <i class="fas fa-file-alt"></i>
+                                <i class="fas fa-tags"></i>
                                 <span>Kategori Barang</span>
                             </a>
                         </li>
-                        @endif
-                        @if(Auth::user()->is_admin || Auth::user()->hasAccess('jenis_barang'))
+                        @endif --}}
+                        {{-- Jenis Barang - Icon Diubah --}}
+                        {{-- @if(Auth::user()->is_admin || Auth::user()->hasAccess('jenis_barang'))
                         <li class="nav-item">
                             <a class="submenu-link {{ request()->is('jenis-barang*') ? 'active' : '' }}" href="{{ route('jenis-barang.index') }}">
-                                <i class="fas fa-file-alt"></i>
+                                <i class="fas fa-layer-group"></i>
                                 <span>Jenis Barang</span>
                             </a>
                         </li>
-                        @endif
-                        @if(Auth::user()->is_admin || Auth::user()->hasAccess('nama_barang'))
+                        @endif --}}
+                        {{-- Nama Barang - Icon Diubah --}}
+                        {{-- @if(Auth::user()->is_admin || Auth::user()->hasAccess('nama_barang'))
                         <li class="nav-item">
-                            <a class="submenu-link {{ request()->is('nama-barang*') ? 'active' : '' }}" href="{{ route('jenis-barang.index') }}">
-                                <i class="fas fa-file-alt"></i>
+                            <a class="submenu-link {{ request()->is('nama-barang*') ? 'active' : '' }}" href="{{ route('nama-barang.index') }}">
+                                <i class="fas fa-cube"></i>
                                 <span>Nama Barang</span>
                             </a>
                         </li>
-                        @endif
+                        @endif --}}
                     </ul>
                 </li>
 
@@ -160,14 +164,15 @@
                 </li>
                 @endif
 
-                @if(Auth::user()->is_admin || Auth::user()->hasAccess('inventaris_kapal'))
+                {{-- Inventaris Kapal - Icon Diubah --}}
+                {{-- @if(Auth::user()->is_admin || Auth::user()->hasAccess('inventaris_kapal'))
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('inventaris-kapal*') && !request()->is('inventaris-kapal/monitoring*') ? 'active' : '' }}" href="{{ route('inventaris-kapal.index') }}">
-                        <i class="fas fa-file-invoice"></i>
+                        <i class="fas fa-clipboard-list"></i>
                         <span class="nav-text">Inventaris Kapal</span>
                     </a>
                 </li>
-                @endif
+                @endif --}}
 
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('settings.index') && !request()->is('settings.index') ? 'active' : '' }}" href="{{ route('settings.index') }}">

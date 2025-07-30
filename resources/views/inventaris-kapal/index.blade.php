@@ -51,11 +51,11 @@
                                             <td>{{ $item->stock_akhir ?? '0' }}</td>
                                             <td>
                                                 <div class="d-flex gap-1 justify-content-center">
-                                                    <a href="{{ route('inventaris-kapal.show', $item->id_kode) }}"
+                                                    <a href="{{ route('inventaris-kapal.show', $item->id) }}"
                                                         class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="Detail">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('inventaris-kapal.edit', $item->id_kode) }}"
+                                                    <a href="{{ route('inventaris-kapal.edit', $item->id) }}"
                                                         class="btn btn-sm btn-warning" data-bs-toggle="tooltip"
                                                         title="Edit">
                                                         <i class="fas fa-edit"></i>

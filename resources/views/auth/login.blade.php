@@ -316,7 +316,7 @@
 
             <div class="login-header">
                 <h2>Selamat Datang</h2>
-                <p>Masukkan NIK dan Password Anda untuk mengakses sistem</p>
+                <p>Masukan NRK dan Password Anda untuk mengakses sistem</p>
             </div>
 
             <!-- Session Status -->
@@ -333,10 +333,10 @@
 
                     <!-- NIK -->
                     <div class="form-group">
-                        <label for="nik_kry" class="form-label">NIK Karyawan</label>
+                        <label for="nik_kry" class="form-label">NRK Karyawan</label>
                         <input id="nik_kry" class="form-control @error('nik_kry') is-invalid @enderror" type="text"
                             name="nik_kry" value="{{ old('nik_kry') }}" required autofocus autocomplete="username"
-                            placeholder="Masukkan NIK Karyawan">
+                            placeholder="Masukan NRK Karyawan">
                         @error('nik_kry')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
@@ -348,7 +348,7 @@
                         <div class="password-input-container">
                             <input id="password" class="form-control @error('password') is-invalid @enderror"
                                 type="password" name="password" required autocomplete="current-password"
-                                placeholder="Masukkan Password">
+                                placeholder="Masukan Password">
                             <button type="button" class="password-toggle" onclick="togglePassword()">
                                 <i class="fas fa-eye" id="password-eye"></i>
                             </button>

@@ -106,42 +106,47 @@
                             </a>
                         </li>
                         @endif
+
                         {{-- Golongan Barang - Icon Diubah --}}
-                        @if(Auth::user()->is_admin || Auth::user()->hasAccess('golongan_barang'))
+                        {{-- @if(Auth::user()->is_admin || Auth::user()->hasAccess('golongan_barang'))
                         <li class="nav-item">
                             <a class="submenu-link {{ request()->is('golongan-barang*') ? 'active' : '' }}" href="{{ route('golongan-barang.index') }}">
                                 <i class="fas fa-boxes"></i>
                                 <span>Golongan Barang</span>
                             </a>
                         </li>
-                        @endif
+                        @endif --}}
+
                         {{-- Kategori Barang - Icon Diubah --}}
-                        @if(Auth::user()->is_admin || Auth::user()->hasAccess('kategori_barang'))
+                        {{-- @if(Auth::user()->is_admin || Auth::user()->hasAccess('kategori_barang'))
                         <li class="nav-item">
                             <a class="submenu-link {{ request()->is('kategori-barang*') ? 'active' : '' }}" href="{{ route('kategori-barang.index') }}">
                                 <i class="fas fa-tags"></i>
                                 <span>Kategori Barang</span>
                             </a>
                         </li>
-                        @endif
+                        @endif --}}
+
                         {{-- Jenis Barang - Icon Diubah --}}
-                        @if(Auth::user()->is_admin || Auth::user()->hasAccess('jenis_barang'))
+                        {{-- @if(Auth::user()->is_admin || Auth::user()->hasAccess('jenis_barang'))
                         <li class="nav-item">
                             <a class="submenu-link {{ request()->is('jenis-barang*') ? 'active' : '' }}" href="{{ route('jenis-barang.index') }}">
                                 <i class="fas fa-layer-group"></i>
                                 <span>Jenis Barang</span>
                             </a>
                         </li>
-                        @endif
+                        @endif --}}
+
                         {{-- Nama Barang - Icon Diubah --}}
-                        @if(Auth::user()->is_admin || Auth::user()->hasAccess('nama_barang'))
+                        {{-- @if(Auth::user()->is_admin || Auth::user()->hasAccess('nama_barang'))
                         <li class="nav-item">
                             <a class="submenu-link {{ request()->is('nama-barang*') ? 'active' : '' }}" href="{{ route('nama-barang.index') }}">
                                 <i class="fas fa-cube"></i>
                                 <span>Nama Barang</span>
                             </a>
                         </li>
-                        @endif
+                        @endif --}}
+
                     </ul>
                 </li>
 
@@ -165,14 +170,14 @@
                 @endif
 
                 {{-- Inventaris Kapal - Icon Diubah --}}
-                @if(Auth::user()->is_admin || Auth::user()->hasAccess('inventaris_kapal'))
+                {{-- @if(Auth::user()->is_admin || Auth::user()->hasAccess('inventaris_kapal'))
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('inventaris-kapal*') && !request()->is('inventaris-kapal/monitoring*') ? 'active' : '' }}" href="{{ route('inventaris-kapal.index') }}">
                         <i class="fas fa-clipboard-list"></i>
                         <span class="nav-text">Inventaris Kapal</span>
                     </a>
                 </li>
-                @endif
+                @endif --}}
 
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('settings.index') && !request()->is('settings.index') ? 'active' : '' }}" href="{{ route('settings.index') }}">

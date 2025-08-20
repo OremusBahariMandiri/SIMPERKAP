@@ -63,6 +63,7 @@
                                         <th>Tgl Peringatan</th>
                                         <th>Peringatan</th>
                                         <th width="8%" class="text-center">Status</th>
+                                        <th width="8%" class="text-center">Dokumen</th>
                                         <th class="text-center" width="15%">Aksi</th>
                                     </tr>
                                 </thead>
@@ -109,6 +110,20 @@
                                                     <span class="badge" style="background-color: blue">Berlaku</span>
                                                 @elseif ($dokumen->status_dok == 'Tidak Berlaku')
                                                     <span class="badge bg-danger">Tidak Berlaku</span>
+                                                @endif
+                                            </td>
+                                            {{-- <td>{{ $dokumen->no_reg }}</td> --}}
+                                            <td class="text-center">
+                                                @if ($dokumen->file_dok)
+                                                    <div class="btn-group">
+                                                        <a href="{{ route('dokumen-kapal.viewDocument', $dokumen->id) }}"
+                                                            target="_blank" class="btn btn-sm btn-info"
+                                                            data-bs-toggle="tooltip" title="Lihat Dokumen">
+                                                            <i class="fas fa-eye"></i> Lihat
+                                                        </a>
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted">-</span>
                                                 @endif
                                             </td>
                                             <td>

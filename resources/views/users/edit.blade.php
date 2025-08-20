@@ -37,7 +37,7 @@
                                         </div>
                                         <div class="card-body">
                                             <div class="form-group mb-3">
-                                                <label for="nik_kry" class="form-label fw-bold">NIK <span
+                                                <label for="nik_kry" class="form-label fw-bold">NRK <span
                                                         class="text-danger">*</span></label>
                                                 <div class="input-group">
                                                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>

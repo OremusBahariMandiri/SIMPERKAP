@@ -34,7 +34,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="5%">No</th>
-                                        <th width="15%">NIK</th>
+                                        <th width="15%">NRK</th>
                                         <th>Nama</th>
                                         <th>Departemen</th>
                                         <th>Jabatan</th>

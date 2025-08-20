@@ -27,7 +27,7 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="info-group mb-3">
-                                            <label class="info-label fw-bold">NIK</label>
+                                            <label class="info-label fw-bold">NRK</label>
                                             <div class="info-value">
                                                 <div class="input-group">
                                                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>

@@ -132,7 +132,39 @@ class DokumenKapalController extends Controller
 
         if ($request->hasFile('file_dok')) {
             $file = $request->file('file_dok');
-            $fileName = time() . '_' . $file->getClientOriginalName();
+
+            // Get file extension
+            $extension = $file->getClientOriginalExtension();
+
+            // Clean string from invalid characters for filename
+            $sanitizeFileName = function ($string) {
+                // Replace all invalid characters with dash
+                $cleaned = preg_replace('/[\/\\\:*?"<>|]/', '-', $string);
+                // Remove excessive dashes
+                $cleaned = preg_replace('/-+/', '-', $cleaned);
+                // Trim dashes at beginning and end
+                return trim($cleaned, '-');
+            };
+
+            // Get kapal name
+            $kapal = Kapal::where('id_kode', $request->nama_kpl)->first();
+            $namaKapal = $kapal ? $sanitizeFileName($kapal->nama_kpl) : 'unknown';
+
+            // Get nama dokumen
+            $namaDokumen = NamaDokumen::where('id_kode', $request->nama_dok)->first();
+            $jenisDok = $namaDokumen ? $sanitizeFileName($namaDokumen->nama_dok) : 'unknown';
+
+            // Format tanggal berakhir
+            $tglBerakhir = $request->jenis_masa_berlaku == 'Tetap' ? 'Permanent' : Carbon::parse($request->tgl_berakhir_dok)->format('Ymd');
+
+            // Clean filename components
+            $cleanNoReg = $sanitizeFileName($request->no_reg);
+            $cleanJenisDok = $sanitizeFileName($jenisDok);
+
+            // Build the filename
+            $fileName = $cleanNoReg . '_' . $cleanJenisDok . '_' . $namaKapal . '_' . $tglBerakhir . '.' . $extension;
+
+            // Store file with the new name
             $file->storeAs('dokumen_kapal', $fileName, 'public');
             $data['file_dok'] = $fileName;
         }
@@ -219,9 +251,8 @@ class DokumenKapalController extends Controller
             'nama_kpl' => $request->nama_kpl,
             'kategori_dok' => $request->kategori_dok,
             'nama_dok' => $request->nama_dok,
-            'validasi_dok' => $request->jenis_masa_berlaku,
             'penerbit_dok' => $request->penerbit_dok,
-            'validasi_dok' => $request->validasi_dok,
+            'validasi_dok' => $request->jenis_masa_berlaku,
             'tgl_terbit_dok' => $request->tgl_terbit_dok,
             'tgl_berakhir_dok' => $request->jenis_masa_berlaku == 'Tetap' ? null : $request->tgl_berakhir_dok,
             'masa_berlaku' => $masa_berlaku,
@@ -234,12 +265,44 @@ class DokumenKapalController extends Controller
 
         if ($request->hasFile('file_dok')) {
             // Delete old file if exists
-            if ($dokumenKapal->file_dok) {
+            if ($dokumenKapal->file_dok && Storage::disk('public')->exists('dokumen_kapal/' . $dokumenKapal->file_dok)) {
                 Storage::disk('public')->delete('dokumen_kapal/' . $dokumenKapal->file_dok);
             }
 
             $file = $request->file('file_dok');
-            $fileName = time() . '_' . $file->getClientOriginalName();
+
+            // Get file extension
+            $extension = $file->getClientOriginalExtension();
+
+            // Clean string from invalid characters for filename
+            $sanitizeFileName = function ($string) {
+                // Replace all invalid characters with dash
+                $cleaned = preg_replace('/[\/\\\:*?"<>|]/', '-', $string);
+                // Remove excessive dashes
+                $cleaned = preg_replace('/-+/', '-', $cleaned);
+                // Trim dashes at beginning and end
+                return trim($cleaned, '-');
+            };
+
+            // Get kapal name
+            $kapal = Kapal::where('id_kode', $request->nama_kpl)->first();
+            $namaKapal = $kapal ? $sanitizeFileName($kapal->nama_kpl) : 'unknown';
+
+            // Get nama dokumen
+            $namaDokumen = NamaDokumen::where('id_kode', $request->nama_dok)->first();
+            $jenisDok = $namaDokumen ? $sanitizeFileName($namaDokumen->nama_dok) : 'unknown';
+
+            // Format tanggal berakhir
+            $tglBerakhir = $request->jenis_masa_berlaku == 'Tetap' ? 'Permanent' : Carbon::parse($request->tgl_berakhir_dok)->format('Ymd');
+
+            // Clean filename components
+            $cleanNoReg = $sanitizeFileName($dokumenKapal->no_reg);
+            $cleanJenisDok = $sanitizeFileName($jenisDok);
+
+            // Build the filename
+            $fileName = $cleanNoReg . '_' . $cleanJenisDok . '_' . $namaKapal . '_' . $tglBerakhir . '.' . $extension;
+
+            // Store file with the new name
             $file->storeAs('dokumen_kapal', $fileName, 'public');
             $data['file_dok'] = $fileName;
         }
@@ -252,8 +315,8 @@ class DokumenKapalController extends Controller
 
     public function destroy(DokumenKapal $dokumenKapal)
     {
-        // Delete file if exists
-        if ($dokumenKapal->file_dok) {
+        // Delete file from storage if exists
+        if ($dokumenKapal->file_dok && Storage::disk('public')->exists('dokumen_kapal/' . $dokumenKapal->file_dok)) {
             Storage::disk('public')->delete('dokumen_kapal/' . $dokumenKapal->file_dok);
         }
 
@@ -266,118 +329,41 @@ class DokumenKapalController extends Controller
     public function download(DokumenKapal $dokumenKapal)
     {
         if (!$dokumenKapal->file_dok) {
-            return back()->with('error', 'File tidak ditemukan.');
+            return redirect()->back()->with('error', 'Tidak ada file yang tersedia untuk diunduh.');
         }
 
-        $path = storage_path('app/public/dokumen_kapal/' . $dokumenKapal->file_dok);
+        $filePath = storage_path('app/public/dokumen_kapal/' . $dokumenKapal->file_dok);
 
-        if (!file_exists($path)) {
-            return back()->with('error', 'File tidak ditemukan.');
+        // Check if file exists
+        if (!file_exists($filePath)) {
+            return redirect()->back()->with('error', 'File tidak ditemukan.');
         }
 
-        // Mendapatkan ekstensi dari file asli
-        $originalExtension = pathinfo($dokumenKapal->file_dok, PATHINFO_EXTENSION);
+        return response()->download($filePath, $dokumenKapal->file_dok);
+    }
 
-        // Format tanggal terbit untuk nama file
-        $tanggalTerbit = $dokumenKapal->tgl_terbit_dok ? Carbon::parse($dokumenKapal->tgl_terbit_dok)->format('Ymd') : date('Ymd');
-
-        // Membersihkan string dari karakter yang tidak valid untuk nama file
-        $sanitizeFileName = function ($string) {
-            // Pertama ganti semua karakter tidak valid dengan tanda strip
-            $cleaned = preg_replace('/[\/\\\:*?"<>|]/', '-', $string);
-            // Hilangkan kemungkinan tanda strip berlebih
-            $cleaned = preg_replace('/-+/', '-', $cleaned);
-            // Trim tanda strip di awal dan akhir
-            return trim($cleaned, '-');
-        };
-
-        // Membersihkan komponen nama file
-        $cleanNoReg = $sanitizeFileName($dokumenKapal->no_reg);
-        $cleanNamaDok = $dokumenKapal->namaDokumen ? $sanitizeFileName($dokumenKapal->namaDokumen->nama_dok) : 'dokumen';
-        $cleanNamaKapal = $dokumenKapal->kapal ? $sanitizeFileName($dokumenKapal->kapal->nama_kpl) : 'kapal';
-
-        // Format nama file: NoReg_NamaDokumen_NamaKapal_TanggalTerbit
-        $newFileName = $cleanNoReg . '_' . $cleanNamaDok . '_' . $cleanNamaKapal . '_' . $tanggalTerbit . '.' . $originalExtension;
-
-        return response()->download($path, $newFileName);
+    public function monitoring()
+    {
+        $kategoriDokumen = KategoriDokumen::all();
+        return view('dokumen-kapal.monitoring', compact('kategoriDokumen'));
     }
 
     public function detail(DokumenKapal $dokumenKapal)
     {
         $dokumenKapal->load(['kapal', 'kategoriDokumen', 'namaDokumen']);
+
+        // Format dates for display
+        if ($dokumenKapal->tgl_terbit_dok) {
+            $dokumenKapal->tgl_terbit_dok_formatted = Carbon::parse($dokumenKapal->tgl_terbit_dok)->format('d-m-Y');
+        }
+        if ($dokumenKapal->tgl_berakhir_dok) {
+            $dokumenKapal->tgl_berakhir_dok_formatted = Carbon::parse($dokumenKapal->tgl_berakhir_dok)->format('d-m-Y');
+        }
+        if ($dokumenKapal->tgl_peringatan) {
+            $dokumenKapal->tgl_peringatan_formatted = Carbon::parse($dokumenKapal->tgl_peringatan)->format('d-m-Y');
+        }
+
         return view('dokumen-kapal.detail', compact('dokumenKapal'));
-    }
-
-    public function monitoring()
-    {
-        $dokumen = DokumenKapal::with(['kapal', 'kategoriDokumen', 'namaDokumen'])
-            ->whereNotNull('tgl_berakhir_dok')
-            ->get();
-
-        // Menghitung dokumen yang akan expired dalam 30, 60, 90 hari
-        $today = now();
-        $expired30 = $dokumen->filter(function ($item) use ($today) {
-            return $item->tgl_berakhir_dok && $today->diffInDays($item->tgl_berakhir_dok, false) <= 30 && $today->diffInDays($item->tgl_berakhir_dok, false) >= 0;
-        });
-
-        $expired60 = $dokumen->filter(function ($item) use ($today) {
-            return $item->tgl_berakhir_dok && $today->diffInDays($item->tgl_berakhir_dok, false) <= 60 && $today->diffInDays($item->tgl_berakhir_dok, false) > 30;
-        });
-
-        $expired90 = $dokumen->filter(function ($item) use ($today) {
-            return $item->tgl_berakhir_dok && $today->diffInDays($item->tgl_berakhir_dok, false) <= 90 && $today->diffInDays($item->tgl_berakhir_dok, false) > 60;
-        });
-
-        $expired = $dokumen->filter(function ($item) use ($today) {
-            return $item->tgl_berakhir_dok && $today->diffInDays($item->tgl_berakhir_dok, false) < 0;
-        });
-
-        return view('dokumen-kapal.monitoring', compact('expired30', 'expired60', 'expired90', 'expired'));
-    }
-
-    /**
-     * Get statistics for document status (expired, warning)
-     */
-    public function getDocumentStats()
-    {
-        // Hitung dokumen yang expired berdasarkan TglPengingat atau TglBerakhirDok
-        $expiredCount = DokumenKapal::where(function ($query) {
-            // Dokumen dengan Tanggal Pengingat yang sudah lewat atau hari ini
-            $query->whereNotNull('tgl_peringatan')
-                ->where('tgl_peringatan', '<=', now());
-        })->orWhere(function ($query) {
-            // Atau dokumen dengan Tanggal Berakhir yang sudah lewat
-            $query->whereNotNull('tgl_berakhir_dok')
-                ->where('tgl_berakhir_dok', '<', now())
-                // Dan tidak memiliki TglPengingat yang sudah tercakup di kondisi sebelumnya
-                ->where(function ($q) {
-                    $q->whereNull('tgl_peringatan')
-                        ->orWhere('tgl_peringatan', '>', now());
-                });
-        })->count();
-
-        // Hitung dokumen yang akan expired (warning)
-        $warningCount = DokumenKapal::where(function ($query) {
-            // Dokumen dengan Tanggal Pengingat dalam 30 hari ke depan
-            $query->whereNotNull('tgl_peringatan')
-                ->where('tgl_peringatan', '>', now())
-                ->where('tgl_peringatan', '<=', now()->addDays(30));
-        })->orWhere(function ($query) {
-            // Atau dokumen dengan Tanggal Berakhir dalam 30 hari ke depan
-            $query->whereNotNull('tgl_berakhir_dok')
-                ->where('tgl_berakhir_dok', '>=', now())
-                ->where('tgl_berakhir_dok', '<=', now()->addDays(30))
-                // Dan tidak memiliki TglPengingat yang sudah tercakup di kondisi sebelumnya
-                ->where(function ($q) {
-                    $q->whereNull('tgl_peringatan')
-                        ->orWhere('tgl_peringatan', '>', now()->addDays(30));
-                });
-        })->count();
-
-        return response()->json([
-            'expired' => $expiredCount,
-            'warning' => $warningCount
-        ]);
     }
 
     /**
@@ -441,7 +427,6 @@ class DokumenKapalController extends Controller
         // Path file
         $filePath = storage_path('app/public/dokumen_kapal/' . $dokumenKapal->file_dok);
 
-
         // Cek apakah file ada
         if (!file_exists($filePath)) {
             // Try alternative path (in case path in database is different)
@@ -479,9 +464,6 @@ class DokumenKapalController extends Controller
         // Jika file tidak dapat dipreview, redirect ke download
         return redirect()->route('dokumen-kapal.download', $dokumenKapal);
     }
-
-    // Tambahkan method berikut ke DokumenKapalController.php
-
 
     /**
      * Export dokumen kapal ke Excel berdasarkan filter

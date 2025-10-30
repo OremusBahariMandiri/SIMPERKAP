@@ -9,7 +9,7 @@ class InventarisKapal extends Model
 {
     use HasFactory;
 
-    protected $table = 'b03_Inventaris_Kpl';
+    protected $table = 'b03_inventaris_kpl';
 
     protected $fillable = [
         'id_kode',

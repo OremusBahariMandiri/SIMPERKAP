@@ -296,7 +296,7 @@
     <div class="login-container">
         <!-- Left Side - Image -->
         <div class="login-image-container">
-            <img src="{{ Vite::asset('resources/assets/images/kapalace.jpg') }}"
+            <img src="{{ asset('images/kapalace.jpg') }}"
                 alt="Ship Navigation Bridge" class="login-image">
             <div class="image-overlay">
                 <h1>SIMPERKAP</h1>

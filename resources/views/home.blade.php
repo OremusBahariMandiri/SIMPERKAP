@@ -8,7 +8,7 @@
                 <div class="card shadow-sm mb-3">
                     <div class="card-body p-0">
                         <div class="dashboard-image-container position-relative">
-                            <img src="{{Vite::asset('resources/assets/images/kapalace.jpg')}}" class="dashboard-image">
+                            <img src="{{asset('images/kapalace.jpg')}}" class="dashboard-image">
                             <div class="overlay"></div>
                         </div>
                     </div>

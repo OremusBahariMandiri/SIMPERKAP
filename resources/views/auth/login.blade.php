@@ -358,6 +358,14 @@
                         @enderror
                     </div>
 
+                    <div class="form-group">
+                        {!! NoCaptcha::renderJs() !!}
+                        {!! NoCaptcha::display(['data-theme' => 'light']) !!}
+                        @error('g-recaptcha-response')
+                            <div class="error-message">{{ $message }}</div>
+                        @enderror
+                    </div>
+
 
                     <div class="form-group">
                         <button type="submit" class="btn btn-secondary w-100">

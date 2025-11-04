@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Rules\RecaptchaRule;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 
@@ -82,6 +83,11 @@ class LoginController extends Controller
         $request->validate([
             $this->username() => 'required|string',
             'password' => 'required|string',
+            'g-recaptcha-response' => ['required', new RecaptchaRule],
+        ], [
+            'nik_kry.required' => 'NRK wajib diisi',
+            'password.required' => 'Password wajib diisi',
+            'g-recaptcha-response.required' => 'Silakan centang "Saya bukan robot"',
         ]);
     }
 }

@@ -61,8 +61,8 @@ class SecurityHeaders
             $policies = [
                 "default-src 'self'",
                 "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173 https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://code.jquery.com https://cdn.datatables.net",
-                "style-src 'self' 'unsafe-inline' http://localhost:5173 https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.datatables.net",
-                "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdn.datatables.net data:",
+                "style-src 'self' 'unsafe-inline' http://localhost:5173 https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.datatables.net https://fonts.bunny.net https://cdnjs.cloudflare.com",
+                "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdn.datatables.net https://cdnjs.cloudflare.com https://fonts.bunny.net data:",
                 "img-src 'self' data: https: http: blob:",
                 "connect-src 'self' http://localhost:5173 ws://localhost:5173 https://cdn.jsdelivr.net",
                 "frame-ancestors 'self'",
@@ -74,8 +74,8 @@ class SecurityHeaders
             $policies = [
                 "default-src 'self'",
                 "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://code.jquery.com https://cdn.datatables.net",
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.datatables.net",
-                "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdn.datatables.net data:",
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.datatables.net https://fonts.bunny.net https://cdnjs.cloudflare.com",
+                "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdn.datatables.net https://cdnjs.cloudflare.com https://fonts.bunny.net data:",
                 "img-src 'self' data: https: blob:",
                 "connect-src 'self' https://cdn.jsdelivr.net",
                 "frame-ancestors 'self'",

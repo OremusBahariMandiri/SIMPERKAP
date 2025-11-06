@@ -28,20 +28,20 @@ class ThrottleRequestsWithLogging
             return $next($request);
         }
 
-        // Define rate limits by type with increased limits
+        // Define rate limits by type - LEBIH LONGGAR untuk production
         $limits = [
-            'default' => 60,      // Default: 60 requests per minute
-            'read' => 120,        // Read operations: 120 requests per minute
-            'create' => 60,       // Create operations: 60 requests per minute (increased from 30)
-            'update' => 60,       // Update operations: 60 requests per minute (increased from 30)
-            'delete' => 30,       // Delete operations: 30 requests per minute (increased from 20)
-            'download' => 30,     // Downloads: 30 requests per minute (increased from 15)
-            'dashboard' => 120,   // Dashboard access: 120 requests per minute (increased from 100)
-            'api' => 200,         // API calls: 200 requests per minute (increased from 180)
-            'profile' => 60,      // Profile operations: 60 requests per minute (increased from 40)
-            'export' => 10,       // Export operations: 10 requests per minute (increased from 5)
-            'admin' => 120,       // Admin operations: 120 requests per minute (increased from 100)
-            'general' => 250      // General throttling: 250 requests per minute (increased from 200)
+            'default' => 100,      // Default: 100 requests per minute
+            'read' => 200,         // Read operations: 200 requests per minute
+            'create' => 100,       // Create operations: 100 requests per minute (DINAIKKAN)
+            'update' => 100,       // Update operations: 100 requests per minute
+            'delete' => 50,        // Delete operations: 50 requests per minute
+            'download' => 50,      // Downloads: 50 requests per minute
+            'dashboard' => 200,    // Dashboard access: 200 requests per minute
+            'api' => 300,          // API calls: 300 requests per minute
+            'profile' => 100,      // Profile operations: 100 requests per minute
+            'export' => 20,        // Export operations: 20 requests per minute
+            'admin' => 200,        // Admin operations: 200 requests per minute
+            'general' => 300       // General throttling: 300 requests per minute
         ];
 
         // Get the appropriate limit or use default

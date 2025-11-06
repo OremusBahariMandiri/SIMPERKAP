@@ -120,7 +120,7 @@ if (config('app.env') === 'local' || in_array(request()->ip(), ['127.0.0.1', '::
             // Users with rate limiting
             Route::prefix('users')->name('users.')->group(function () {
                 // Create & Store
-                Route::middleware(['throttle.log:create'])->group(function () {
+                Route::middleware(['throttle.log:100'])->group(function () {
                     Route::get('/create', [UserController::class, 'create'])->name('create');
                     Route::post('/', [UserController::class, 'store'])->name('store');
                 });
@@ -204,7 +204,7 @@ if (config('app.env') === 'local' || in_array(request()->ip(), ['127.0.0.1', '::
             });
 
             // Create operations
-            Route::middleware(['throttle.log:create'])->group(function () {
+            Route::middleware(['throttle.log:100'])->group(function () {
                 // Resource routes - Create operations
                 Route::get('perusahaan/create', [PerusahaanController::class, 'create'])->name('perusahaan.create');
                 Route::post('perusahaan', [PerusahaanController::class, 'store'])->name('perusahaan.store');

@@ -1,4 +1,5 @@
 <?php
+// file: app/Http/Middleware/DDoSProtection.php
 
 namespace App\Http\Middleware;
 
@@ -13,6 +14,11 @@ use App\Services\ActivityHubClient;
 class DDoSProtection
 {
     protected $activityHub;
+    // White-listed IPs that should never be banned
+    protected $trustedIps = [
+        // Add your company or trusted IPs here
+        // '203.0.113.1',
+    ];
 
     public function __construct(ActivityHubClient $activityHub)
     {
@@ -20,82 +26,92 @@ class DDoSProtection
     }
 
     /**
-     * Handle an incoming request.
+     * Handle an incoming request with more balanced thresholds.
      */
     public function handle(Request $request, Closure $next): Response
     {
         $ip = $request->ip();
 
-        // PENTING: Selalu izinkan IP lokal dan pengembangan
-        $localIps = ['127.0.0.1', '::1', 'localhost'];
-        if (in_array($ip, $localIps) || strpos($ip, '192.168.') === 0) {
+        // Allow trusted IPs to bypass protection entirely
+        if ($this->isTrustedIp($ip)) {
+            return $next($request);
+        }
+
+        // Skip check for static resources to improve performance
+        if ($this->isStaticResource($request)) {
             return $next($request);
         }
 
         $userAgent = $request->userAgent() ?? 'Unknown';
 
-        // Cek apakah IP sudah di-ban
+        // Check if IP is banned
         if ($this->isIpBanned($ip)) {
-            Log::warning('Blocked banned IP attempting access', [
-                'ip' => $ip,
-                'url' => $request->fullUrl(),
-                'user_agent' => $userAgent
-            ]);
-
-            // Kirim info ke Activity Hub
-            try {
-                $this->activityHub->logSecurityEvent('blocked_ip', 'medium', [
-                    'ip_address' => $ip,
+            // Only log if not already logged recently
+            $logKey = "banned_ip_logged:{$ip}";
+            if (!Cache::has($logKey)) {
+                Log::warning('Blocked banned IP attempting access', [
+                    'ip' => $ip,
                     'url' => $request->fullUrl(),
-                    'user_id' => auth()->id(),
-                    'user_email' => auth()->user()->email ?? null,
+                    'user_agent' => $userAgent
                 ]);
-            } catch (\Exception $e) {
-                Log::error('Failed to send to Activity Hub: ' . $e->getMessage());
+
+                // Log to Activity Hub
+                try {
+                    $this->activityHub->logSecurityEvent('blocked_ip', 'medium', [
+                        'ip_address' => $ip,
+                        'url' => $request->fullUrl(),
+                        'user_id' => auth()->id(),
+                        'user_email' => auth()->user()->email ?? null,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send to Activity Hub: ' . $e->getMessage());
+                }
+
+                // Prevent log flooding by caching that we've logged this IP recently
+                Cache::put($logKey, true, 300); // 5 minutes
             }
 
-            // Cek jika request adalah AJAX/API
+            // Handle the response
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => 'Your IP has been temporarily blocked due to suspicious activity.',
+                    'message' => 'Your access is temporarily limited due to suspicious activity.',
                     'retry_after' => $this->getBanTimeRemaining($ip)
                 ], 403);
             }
 
-            // Generate error code for tracking
             $errorCode = Str::random(8);
-            Log::warning('IP access blocked: ' . $errorCode, [
-                'ip' => $ip,
-                'error_code' => $errorCode
-            ]);
-
-            // Untuk request biasa, tampilkan halaman error
             return response()->view('errors.blocked', [
                 'retryAfter' => $this->getBanTimeRemaining($ip),
                 'errorCode' => $errorCode
             ], 403);
         }
 
-        // Track request patterns
-        $this->trackRequest($ip, $request);
+        // For authenticated users, we're more lenient with thresholds
+        $isAuthenticated = auth()->check();
 
-        // Analisa pola serangan - DENGAN THRESHOLD YANG LEBIH TINGGI
-        if ($this->detectSuspiciousActivity($ip)) {
-            $this->banIp($ip);
+        // Track request patterns - use separate tracking for auth vs non-auth
+        $this->trackRequest($ip, $request, $isAuthenticated);
 
-            Log::alert('Potential DDoS attack detected - IP banned', [
+        // Detect suspicious activity with more balanced thresholds
+        if ($this->detectSuspiciousActivity($ip, $isAuthenticated)) {
+            // Ban duration is shorter for authenticated users
+            $banDuration = $isAuthenticated ? 5 : 10;
+            $this->banIp($ip, $banDuration);
+
+            Log::alert('Potential DDoS attack detected - IP temporarily limited', [
                 'ip' => $ip,
-                'requests' => $this->getRequestCount($ip),
+                'requests' => $this->getRequestCount($ip, $isAuthenticated),
                 'user_agent' => $userAgent,
-                'url' => $request->fullUrl()
+                'url' => $request->fullUrl(),
+                'is_authenticated' => $isAuthenticated
             ]);
 
-            // Kirim info ke Activity Hub
+            // Log to Activity Hub
             try {
-                $this->activityHub->logSecurityEvent('ddos_attempt', 'critical', [
+                $this->activityHub->logSecurityEvent('ddos_attempt', 'high', [
                     'ip_address' => $ip,
                     'url' => $request->fullUrl(),
-                    'request_count' => $this->getRequestCount($ip),
+                    'request_count' => $this->getRequestCount($ip, $isAuthenticated),
                     'user_id' => auth()->id(),
                     'user_email' => auth()->user()->email ?? null,
                 ]);
@@ -103,45 +119,43 @@ class DDoSProtection
                 Log::error('Failed to send to Activity Hub: ' . $e->getMessage());
             }
 
-            // Cek jika request adalah AJAX/API
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => 'Suspicious activity detected. Your IP has been blocked.',
+                    'message' => 'Rate limit exceeded. Please slow down your requests.',
+                    'retry_after' => $banDuration * 60
                 ], 429);
             }
 
-            // Generate error code untuk tracking
             $errorCode = Str::random(8);
-            Log::alert('Suspicious activity blocked: ' . $errorCode, [
-                'ip' => $ip,
-                'error_code' => $errorCode
-            ]);
-
-            // Untuk request biasa, tampilkan halaman error
             return response()->view('errors.blocked', [
-                'retryAfter' => $this->getBanTimeRemaining($ip),
+                'retryAfter' => $banDuration * 60,
                 'errorCode' => $errorCode
             ], 429);
         }
 
-        // Deteksi bot jahat berdasarkan user agent - HANYA LOG, TIDAK BLOCK
+        // We'll only log, not block, for suspicious user agents
         if ($this->isSuspiciousUserAgent($userAgent)) {
-            Log::warning('Suspicious user agent detected', [
-                'ip' => $ip,
-                'user_agent' => $userAgent
-            ]);
-
-            // Kirim info ke Activity Hub
-            try {
-                $this->activityHub->logSecurityEvent('suspicious_activity', 'medium', [
-                    'ip_address' => $ip,
-                    'url' => $request->fullUrl(),
-                    'user_agent' => $userAgent,
-                    'user_id' => auth()->id(),
-                    'user_email' => auth()->user()->email ?? null,
+            $logKey = "suspicious_ua_logged:{$ip}:{$userAgent}";
+            if (!Cache::has($logKey)) {
+                Log::warning('Suspicious user agent detected', [
+                    'ip' => $ip,
+                    'user_agent' => $userAgent
                 ]);
-            } catch (\Exception $e) {
-                Log::error('Failed to send to Activity Hub: ' . $e->getMessage());
+
+                // Only log to Activity Hub once every 24 hours for the same IP/UA combo
+                try {
+                    $this->activityHub->logSecurityEvent('suspicious_activity', 'low', [
+                        'ip_address' => $ip,
+                        'url' => $request->fullUrl(),
+                        'user_agent' => $userAgent,
+                        'user_id' => auth()->id(),
+                        'user_email' => auth()->user()->email ?? null,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send to Activity Hub: ' . $e->getMessage());
+                }
+
+                Cache::put($logKey, true, 1440); // 24 hours
             }
         }
 
@@ -149,16 +163,32 @@ class DDoSProtection
     }
 
     /**
-     * Track request dari IP - LEBIH SEDIKIT TRACKING
+     * Check if IP is in trusted list
      */
-    protected function trackRequest(string $ip, Request $request): void
+    protected function isTrustedIp(string $ip): bool
     {
-        // Skip jika permintaan ke asset statis
+        // Always trust localhost and internal networks
+        $localIps = ['127.0.0.1', '::1', 'localhost'];
+        if (in_array($ip, $localIps) || strpos($ip, '192.168.') === 0) {
+            return true;
+        }
+
+        // Check custom trusted IPs
+        return in_array($ip, $this->trustedIps);
+    }
+
+    /**
+     * Track request from IP - with auth status consideration
+     */
+    protected function trackRequest(string $ip, Request $request, bool $isAuthenticated): void
+    {
+        // Skip if request is to static asset
         if ($this->isStaticResource($request)) {
             return;
         }
 
-        $key = "request_tracking:{$ip}";
+        $suffix = $isAuthenticated ? 'auth' : 'anon';
+        $key = "request_tracking:{$ip}:{$suffix}";
         $requests = Cache::get($key, []);
 
         $requests[] = [
@@ -167,17 +197,18 @@ class DDoSProtection
             'method' => $request->method(),
         ];
 
-        // Simpan 100 request terakhir dalam 5 menit
+        // Store last 100 requests in 5 minutes
         $requests = array_slice($requests, -100);
         Cache::put($key, $requests, 300);
     }
 
     /**
-     * Deteksi aktivitas mencurigakan - THRESHOLD YANG LEBIH TINGGI
+     * Detect suspicious activity - more balanced thresholds
      */
-    protected function detectSuspiciousActivity(string $ip): bool
+    protected function detectSuspiciousActivity(string $ip, bool $isAuthenticated): bool
     {
-        $key = "request_tracking:{$ip}";
+        $suffix = $isAuthenticated ? 'auth' : 'anon';
+        $key = "request_tracking:{$ip}:{$suffix}";
         $requests = Cache::get($key, []);
 
         if (empty($requests)) {
@@ -186,23 +217,38 @@ class DDoSProtection
 
         $now = now()->timestamp;
 
-        // Hitung request dalam 1 menit terakhir
+        // Count requests in last minute
         $recentRequests = array_filter($requests, function ($req) use ($now) {
             return ($now - $req['timestamp']) <= 60;
         });
 
         $requestCount = count($recentRequests);
 
-        // THRESHOLD LEBIH TINGGI: 1000 request per menit (dari 200)
-        if ($requestCount > 1000) {
+        // Different thresholds based on authentication
+        // Authenticated users get higher limits
+        $rateThreshold = $isAuthenticated ? 180 : 120;
+        $patternThreshold = $isAuthenticated ? 0.03 : 0.05;
+        $patternMinRequests = $isAuthenticated ? 150 : 100;
+
+        // Rate-based detection
+        if ($requestCount > $rateThreshold) {
             return true;
         }
 
-        // Deteksi pola request yang sama - THRESHOLD LEBIH TINGGI
-        if ($requestCount > 200) { // Dari 50 menjadi 200
-            $uniqueUrls = count(array_unique(array_column($recentRequests, 'url')));
-            // Jika 95% request ke URL yang sama (dari 90%)
-            if ($uniqueUrls <= ($requestCount * 0.05)) { // Dari 0.1 menjadi 0.05
+        // Pattern-based detection (same URL repeatedly)
+        if ($requestCount > $patternMinRequests) {
+            $urls = array_column($recentRequests, 'url');
+            $uniqueUrls = count(array_unique($urls));
+
+            // If more than 95% (anon) or 97% (auth) of requests are to the same URL
+            if ($uniqueUrls <= ($requestCount * $patternThreshold)) {
+
+                // Check if it's just a polling endpoint which is legitimate
+                $mostCommonUrl = $this->getMostCommonUrl($urls);
+                if ($this->isLegitimatePollingEndpoint($mostCommonUrl)) {
+                    return false;
+                }
+
                 return true;
             }
         }
@@ -211,7 +257,37 @@ class DDoSProtection
     }
 
     /**
-     * Cek apakah request ke resource statis
+     * Get the most common URL from an array
+     */
+    protected function getMostCommonUrl(array $urls): string
+    {
+        $counts = array_count_values($urls);
+        arsort($counts);
+        return key($counts);
+    }
+
+    /**
+     * Check if URL is a legitimate polling endpoint
+     */
+    protected function isLegitimatePollingEndpoint(string $url): bool
+    {
+        // Add your polling/live update endpoints here
+        $pollingEndpoints = [
+            // Example: 'api/notifications',
+            // Example: 'api/status-updates'
+        ];
+
+        foreach ($pollingEndpoints as $endpoint) {
+            if (strpos($url, $endpoint) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if request is to static resource
      */
     protected function isStaticResource(Request $request): bool
     {
@@ -220,25 +296,23 @@ class DDoSProtection
     }
 
     /**
-     * Ban IP address - DURASI LEBIH PENDEK
+     * Ban IP address - shorter duration
      */
-    protected function banIp(string $ip, int $minutes = 10): void // Dari 60 menit menjadi 10 menit
+    protected function banIp(string $ip, int $minutes = 5): void
     {
         $key = "banned_ip:{$ip}";
         Cache::put($key, [
             'banned_at' => now(),
             'expires_at' => now()->addMinutes($minutes),
-            'reason' => 'DDoS protection'
+            'reason' => 'Temporary rate limit'
         ], $minutes * 60);
 
-        // Tambahkan ke log ban
-        $this->logBan($ip);
+        $this->logBan($ip, $minutes);
 
-        // Kirim ke Activity Hub
         try {
-            $this->activityHub->logSecurityEvent('blocked_ip', 'high', [
+            $this->activityHub->logSecurityEvent('blocked_ip', 'medium', [
                 'ip_address' => $ip,
-                'reason' => 'DDoS protection - automated ban',
+                'reason' => 'Temporary rate limit',
                 'duration_minutes' => $minutes
             ]);
         } catch (\Exception $e) {
@@ -247,7 +321,7 @@ class DDoSProtection
     }
 
     /**
-     * Cek apakah IP sudah di-ban
+     * Check if IP is banned
      */
     protected function isIpBanned(string $ip): bool
     {
@@ -271,11 +345,12 @@ class DDoSProtection
     }
 
     /**
-     * Get request count untuk IP
+     * Get request count for IP
      */
-    protected function getRequestCount(string $ip): int
+    protected function getRequestCount(string $ip, bool $isAuthenticated): int
     {
-        $key = "request_tracking:{$ip}";
+        $suffix = $isAuthenticated ? 'auth' : 'anon';
+        $key = "request_tracking:{$ip}:{$suffix}";
         $requests = Cache::get($key, []);
 
         $now = now()->timestamp;
@@ -289,22 +364,23 @@ class DDoSProtection
     /**
      * Log banned IP
      */
-    protected function logBan(string $ip): void
+    protected function logBan(string $ip, int $minutes): void
     {
         $banLog = Cache::get('ban_log', []);
         $banLog[] = [
             'ip' => $ip,
             'banned_at' => now()->toDateTimeString(),
-            'reason' => 'DDoS protection'
+            'duration' => $minutes,
+            'reason' => 'Temporary rate limit'
         ];
 
-        // Simpan 1000 log terakhir
+        // Keep last 1000 logs
         $banLog = array_slice($banLog, -1000);
-        Cache::put('ban_log', $banLog, 86400); // 24 jam
+        Cache::put('ban_log', $banLog, 86400); // 24 hours
     }
 
     /**
-     * Deteksi user agent yang mencurigakan - KURANGI POLA DETEKSI
+     * Detect suspicious user agent - reduced patterns
      */
     protected function isSuspiciousUserAgent(?string $userAgent): bool
     {
@@ -312,10 +388,9 @@ class DDoSProtection
             return true;
         }
 
-        // Kurangi pola yang sering salah positif
+        // Only detect clearly malicious tools
         $suspiciousPatterns = [
-            'nikto', 'scanner', 'nmap', 'masscan',
-            'sqlmap', 'havij', 'acunetix'
+            'nikto', 'sqlmap', 'nmap', 'masscan', 'acunetix'
         ];
 
         $userAgentLower = strtolower($userAgent);

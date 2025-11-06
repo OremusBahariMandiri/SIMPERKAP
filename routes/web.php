@@ -15,6 +15,7 @@ use App\Http\Controllers\JenisBarangController;
 use App\Http\Controllers\KategoriBarangController;
 use App\Http\Controllers\NamaBarangController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SecurityErrorController;
 use App\Http\Controllers\ShipParticularController;
 use App\Http\Controllers\ShipParticularsController;
 use App\Http\Controllers\UserAccessController;
@@ -141,6 +142,13 @@ if (config('app.env') === 'local' || in_array(request()->ip(), ['127.0.0.1', '::
                 Route::middleware(['throttle.log:delete'])->group(function () {
                     Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
                 });
+            });
+
+            Route::prefix('security')->name('security.')->group(function () {
+                Route::get('/blocked', [SecurityErrorController::class, 'blocked'])->name('blocked');
+                Route::get('/unauthorized', [SecurityErrorController::class, 'unauthorized'])->name('unauthorized');
+                Route::get('/ip-not-whitelisted', [SecurityErrorController::class, 'ipNotWhitelisted'])->name('ip-not-whitelisted');
+                Route::get('/error', [SecurityErrorController::class, 'securityError'])->name('error');
             });
 
             // User access

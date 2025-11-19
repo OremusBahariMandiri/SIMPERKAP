@@ -172,7 +172,7 @@
     <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header bg-secondary text-white">
                     <h5 class="modal-title" id="filterModalLabel">
                         <i class="fas fa-filter me-2"></i>Filter Dokumen Kapal
                     </h5>
@@ -251,9 +251,8 @@
                                     <label for="filter_status" class="form-label">Status Dokumen</label>
                                     <select class="form-select" id="filter_status">
                                         <option value="">Semua Status</option>
-                                        <option value="Valid">Berlaku</option>
-                                        <option value="Warning">Segera Habis</option>
-                                        <option value="Expired">Expired</option>
+                                        <option value="Berlaku">Berlaku</option>
+                                        <option value="Tidak Berlaku">Tidak Berlaku</option>
                                     </select>
                                 </div>
                             </div>
@@ -309,7 +308,7 @@
     <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header bg-secondary text-white">
                     <h5 class="modal-title" id="exportModalLabel">
                         <i class="fas fa-download me-2"></i>Ekspor Data
                     </h5>
@@ -321,12 +320,12 @@
                         <button type="button" class="btn btn-success" id="exportExcel">
                             <i class="fas fa-file-excel me-2"></i> Ekspor ke Excel
                         </button>
-                        <button type="button" class="btn btn-danger" id="exportPdf">
+                        {{-- <button type="button" class="btn btn-danger" id="exportPdf">
                             <i class="fas fa-file-pdf me-2"></i> Ekspor ke PDF
                         </button>
                         <button type="button" class="btn btn-secondary" id="exportPrint">
                             <i class="fas fa-print me-2"></i> Print
-                        </button>
+                        </button> --}}
                     </div>
                 </div>
             </div>
@@ -595,7 +594,7 @@
 
                     // Skip non-valid documents
                     if (statusText.includes("Tidak Berlaku")) {
-                        return true; // continue to next iteration
+                        return true;
                     }
 
                     // 2. Check if document is expired based on TglBerakhir
@@ -606,7 +605,7 @@
 
                         if (berakhirDate.isBefore(today)) {
                             expiredCount++;
-                            return true; // Already counted as expired, continue to next row
+                            return true;
                         }
                     }
 
@@ -618,13 +617,11 @@
                         const diffDays = tglPengingat.diff(today, 'days');
 
                         if (diffDays <= 0) {
-                            // Reminder date has passed or is today
                             expiredCount++;
-                            return true; // continue
+                            return true;
                         } else if (diffDays <= 30) {
-                            // Warning: within 30 days
                             warningCount++;
-                            return true; // continue
+                            return true;
                         }
                     }
 
@@ -646,19 +643,17 @@
 
             // Function to highlight visible rows
             function applyRowHighlighting() {
-                // Reset all highlighting on visible rows
                 $('#dokumenKapalTable tbody tr').removeClass(
                     'highlight-red highlight-yellow highlight-orange highlight-gray');
 
-                // Apply highlighting to visible rows only
                 $('#dokumenKapalTable tbody tr').each(function() {
                     const row = $(this);
 
-                    // 1. Check document status first (highest priority)
+                    // 1. Check document status first
                     const statusText = row.find('td:eq(9)').text().trim();
                     if (statusText.includes("Tidak Berlaku")) {
                         row.addClass('highlight-gray');
-                        return true; // continue to next iteration
+                        return true;
                     }
 
                     // 2. Check if expired based on TglBerakhir
@@ -669,7 +664,7 @@
 
                         if (berakhirDate.isBefore(today)) {
                             row.addClass('highlight-red');
-                            return true; // Stop processing this row
+                            return true;
                         }
                     }
 
@@ -681,15 +676,12 @@
                         const diffDays = tglPengingat.diff(today, 'days');
 
                         if (diffDays <= 0) {
-                            // Already expired or today
                             row.addClass('highlight-red');
                             return true;
                         } else if (diffDays <= 7) {
-                            // Urgent warning: within 7 days
                             row.addClass('highlight-yellow');
                             return true;
                         } else if (diffDays <= 30) {
-                            // Warning: within 30 days
                             row.addClass('highlight-orange');
                             return true;
                         }
@@ -716,91 +708,70 @@
                     const tglPengingatStr = $(this).data('tgl-peringatan');
                     const $masaPeringatanCol = $(this).find('.sisa-peringatan-col');
 
-                    // If no reminder date, skip this row
                     if (!tglPengingatStr) {
                         $masaPeringatanCol.text('-');
                         return true;
                     }
 
-                    // Parse reminder date
                     const tglPengingat = moment(tglPengingatStr);
-
-                    // Calculate difference in days
                     const diffDays = tglPengingat.diff(today, 'days');
 
-                    // Determine text to display in warning column
                     let masaPeringatanText = '';
-
                     if (diffDays < 0) {
-                        // Reminder date has passed
                         masaPeringatanText = 'Terlambat ' + Math.abs(diffDays) + ' hari';
                     } else if (diffDays === 0) {
-                        // Reminder date is today
                         masaPeringatanText = 'Hari ini';
                     } else {
-                        // Reminder date is in the future
                         masaPeringatanText = diffDays + ' hari lagi';
                     }
 
-                    // Update warning text
                     $masaPeringatanCol.text(masaPeringatanText);
                 });
             }
 
             // CUSTOM PRIORITY SORTING FUNCTION
             function getRowPriority(row) {
-                // Get necessary values for determining priority
                 const statusText = $(row).find('td:eq(9)').text().trim();
                 const tglBerakhir = $(row).find('td:eq(6)').text().trim();
                 const tglPengingatStr = $(row).data('tgl-peringatan');
 
-                // Priority 5 (lowest): Documents with "Tidak Berlaku" status (gray)
                 if (statusText.includes("Tidak Berlaku")) {
                     return 5;
                 }
 
-                // Check if document is expired based on TglBerakhir
                 if (tglBerakhir !== '-') {
                     const berakhirDate = moment(tglBerakhir, 'DD/MM/YYYY');
                     const today = moment().startOf('day');
 
                     if (berakhirDate.isBefore(today)) {
-                        // Priority 1 (highest): Expired documents (red)
                         return 1;
                     }
                 }
 
-                // Check TglPengingat for warning/expired status
                 if (tglPengingatStr) {
                     const tglPengingat = moment(tglPengingatStr);
                     const today = moment().startOf('day');
                     const diffDays = tglPengingat.diff(today, 'days');
 
                     if (diffDays <= 0) {
-                        // Priority 1: Already expired or today (red)
                         return 1;
                     } else if (diffDays <= 7) {
-                        // Priority 2: Urgent warning within 7 days (yellow)
                         return 2;
                     } else if (diffDays <= 30) {
-                        // Priority 3: Warning within 30 days (orange/green)
                         return 3;
                     }
                 }
 
-                // Check TglBerakhir for warning (within 30 days)
                 if (tglBerakhir !== '-') {
                     const berakhirDate = moment(tglBerakhir, 'DD/MM/YYYY');
                     const today = moment().startOf('day');
                     const diffDays = berakhirDate.diff(today, 'days');
 
                     if (diffDays > 0 && diffDays <= 30) {
-                        // Priority 2: Warning within 30 days (yellow)
                         return 2;
                     }
                 }
 
-                // Priority 4: Normal documents (no highlight)
                 return 4;
             }
 
@@ -826,56 +797,58 @@
                     let terbitTo = $('#filter_tgl_terbit_to').val();
                     let terbitDate = data[5] !== '-' ? moment(data[5], 'DD/MM/YYYY') : null;
 
-                    if (terbitDate === null) {
-                        if (terbitFrom === '' && terbitTo === '') {
-                            return true;
-                        } else {
-                            return false;
+                    // Filter by issue date
+                    let terbitCondition = true;
+                    if (terbitDate !== null && (terbitFrom !== '' || terbitTo !== '')) {
+                        terbitCondition = false;
+
+                        if (terbitFrom === '' && terbitDate.isSameOrBefore(moment(terbitTo))) {
+                            terbitCondition = true;
+                        } else if (terbitTo === '' && terbitDate.isSameOrAfter(moment(terbitFrom))) {
+                            terbitCondition = true;
+                        } else if (terbitDate.isBetween(moment(terbitFrom), moment(terbitTo), null, '[]')) {
+                            terbitCondition = true;
                         }
                     }
 
-                    if ((terbitFrom === '' && terbitTo === '') ||
-                        (terbitFrom === '' && terbitDate.isSameOrBefore(moment(terbitTo))) ||
-                        (terbitTo === '' && terbitDate.isSameOrAfter(moment(terbitFrom))) ||
-                        (terbitDate.isBetween(moment(terbitFrom), moment(terbitTo), null, '[]'))) {
+                    if (!terbitCondition) return false;
 
-                        // Expiration date filter
-                        let berakhirFrom = $('#filter_tgl_berakhir_from').val();
-                        let berakhirTo = $('#filter_tgl_berakhir_to').val();
-                        let berakhirDate = data[6] !== '-' ? moment(data[6], 'DD/MM/YYYY') : null;
+                    // Expiration date filter
+                    let berakhirFrom = $('#filter_tgl_berakhir_from').val();
+                    let berakhirTo = $('#filter_tgl_berakhir_to').val();
+                    let berakhirDate = data[6] !== '-' ? moment(data[6], 'DD/MM/YYYY') : null;
 
-                        if (berakhirDate === null) {
-                            if (berakhirFrom === '' && berakhirTo === '') {
-                                return true;
-                            } else {
-                                return false;
-                            }
+                    // Filter by expiration date
+                    let berakhirCondition = true;
+                    if (berakhirDate !== null && (berakhirFrom !== '' || berakhirTo !== '')) {
+                        berakhirCondition = false;
+
+                        if (berakhirFrom === '' && berakhirDate.isSameOrBefore(moment(berakhirTo))) {
+                            berakhirCondition = true;
+                        } else if (berakhirTo === '' && berakhirDate.isSameOrAfter(moment(berakhirFrom))) {
+                            berakhirCondition = true;
+                        } else if (berakhirDate.isBetween(moment(berakhirFrom), moment(berakhirTo), null,
+                                '[]')) {
+                            berakhirCondition = true;
                         }
-
-                        if ((berakhirFrom === '' && berakhirTo === '') ||
-                            (berakhirFrom === '' && berakhirDate.isSameOrBefore(moment(berakhirTo))) ||
-                            (berakhirTo === '' && berakhirDate.isSameOrAfter(moment(berakhirFrom))) ||
-                            (berakhirDate.isBetween(moment(berakhirFrom), moment(berakhirTo), null, '[]'))) {
-
-                            // Status filter
-                            let status = $('#filter_status').val();
-                            if (status === '') {
-                                return true;
-                            } else if (status === 'Valid') {
-                                return data[9].includes("Berlaku") &&
-                                    (!berakhirDate || berakhirDate.diff(moment().startOf('day'), 'days') > 30);
-                            } else if (status === 'Warning') {
-                                return berakhirDate &&
-                                    berakhirDate.isAfter(moment().startOf('day')) &&
-                                    berakhirDate.diff(moment().startOf('day'), 'days') <= 30;
-                            } else if (status === 'Expired') {
-                                return berakhirDate && berakhirDate.isBefore(moment().startOf('day'));
-                            }
-                            return true;
-                        }
-                        return false;
                     }
-                    return false;
+
+                    if (!berakhirCondition) return false;
+
+                    // Status filter - HANYA BERLAKU DAN TIDAK BERLAKU
+                    let status = $('#filter_status').val();
+                    if (status === '') {
+                        return true;
+                    } else {
+                        // Extract status text, remove whitespace and HTML elements
+                        const statusElement = $(data[9]);
+                        const rowStatus = statusElement.length > 0 ?
+                            statusElement.text().trim() :
+                            data[9].replace(/<[^>]*>/g, '').trim();
+
+                        // Exact match untuk status
+                        return rowStatus === status;
+                    }
                 }
             );
 
@@ -884,50 +857,40 @@
                 responsive: true,
                 language: indonesianLanguage,
                 columnDefs: [{
-                        // Add custom priority ordering to first column
                         targets: 0,
                         orderDataType: 'dom-priority'
                     },
                     {
-                        // Priority for most important columns
                         responsivePriority: 1,
-                        targets: [0, 1, 2, 9] // No, No.Reg, Nama Kapal, Status
+                        targets: [0, 1, 2, 9]
                     },
                     {
-                        // Second priority for other important columns
                         responsivePriority: 2,
-                        targets: [3, 4] // Kategori, Nama Dokumen
+                        targets: [3, 4]
                     },
                     {
-                        // Third priority for date columns
                         responsivePriority: 3,
-                        targets: [5, 6, 7] // Tgl Terbit, Tgl Berakhir, Tgl Peringatan
+                        targets: [5, 6, 7]
                     },
                     {
-                        // Fourth priority for less important columns
                         responsivePriority: 4,
-                        targets: [8, 10, 11] // Peringatan, Dokumen, Aksi
+                        targets: [8, 10, 11]
                     },
                     {
-                        // Non-sortable columns
                         orderable: false,
-                        targets: [11] // Aksi column
+                        targets: [11]
                     }
                 ],
-                // Set initial ordering based on priority column
                 order: [
                     [0, 'asc']
                 ],
-                // Callback when table is drawn
                 drawCallback: function() {
-                    // Update row numbers
                     this.api().column(0, {
                         page: 'current'
                     }).nodes().each(function(cell, i) {
                         cell.innerHTML = i + 1;
                     });
 
-                    // Apply row highlighting and update warning text for visible rows
                     applyRowHighlighting();
                     updateMasaPeringatanText();
                 },
@@ -957,15 +920,10 @@
                     }
                 ],
                 initComplete: function() {
-                    // Style search input box
                     $('.dataTables_filter input').addClass('form-control');
-
-                    // Apply initial highlighting
                     applyRowHighlighting();
 
-                    // Wait until table is initialized and all data is loaded
                     setTimeout(function() {
-                        // Calculate stats from ALL data, not just visible on current page
                         calculateAllDocumentStats();
                     }, 500);
                 }
@@ -980,18 +938,13 @@
                 $('#exportModal').modal('show');
             });
 
-            // Apply Filter button event handler
+            // Apply Filter button event handler - DIPERBARUI
             $('#applyFilter').on('click', function() {
                 // Apply filters to columns
                 table.column(1).search($('#filter_noreg').val()); // No Reg
                 table.column(2).search($('#filter_kapal').val()); // Kapal
                 table.column(3).search($('#filter_kategori').val()); // Kategori
                 table.column(4).search($('#filter_nama_dok').val()); // Nama Dokumen
-
-                // Filter by status if selected
-                if ($('#filter_status').val()) {
-                    table.column(9).search($('#filter_status').val());
-                }
 
                 // Refresh table to apply all filters
                 table.draw();
@@ -1006,7 +959,7 @@
                 }, 100);
             });
 
-            // Reset Filter button event handler
+            // Reset Filter button event handler - DIPERBARUI
             $('#resetFilter').on('click', function() {
                 // Reset form fields
                 $('#filterForm')[0].reset();
@@ -1025,7 +978,6 @@
 
             // Table draw event to update styling
             table.on('draw.dt', function() {
-                // Apply highlighting and update warning text for visible rows
                 applyRowHighlighting();
                 updateMasaPeringatanText();
             });
@@ -1049,7 +1001,17 @@
 
             // Export button handlers
             $('#exportExcel').on('click', function() {
-                $('.excel-export-btn').trigger('click');
+                $('#export_filter_noreg').val($('#filter_noreg').val());
+                $('#export_filter_kapal').val($('#filter_kapal').val());
+                $('#export_filter_kategori').val($('#filter_kategori').val());
+                $('#export_filter_nama_dok').val($('#filter_nama_dok').val());
+                $('#export_filter_tgl_terbit_from').val($('#filter_tgl_terbit_from').val());
+                $('#export_filter_tgl_terbit_to').val($('#filter_tgl_terbit_to').val());
+                $('#export_filter_tgl_berakhir_from').val($('#filter_tgl_berakhir_from').val());
+                $('#export_filter_tgl_berakhir_to').val($('#filter_tgl_berakhir_to').val());
+                $('#export_filter_status').val($('#filter_status').val());
+
+                $('#exportForm').submit();
                 $('#exportModal').modal('hide');
             });
 
@@ -1065,34 +1027,25 @@
 
             // Delete confirmation handler
             $(document).on('click', '.delete-confirm', function(e) {
-                // Prevent default action
                 e.preventDefault();
                 e.stopPropagation();
 
-                // Get document ID and name
                 var id = $(this).data('id');
                 var name = $(this).data('name');
                 var url = $(this).data('url');
 
-                // Set document name in modal
                 $('#dokNoRegToDelete').text(name);
-
-                // Set form action URL
                 $('#deleteForm').attr('action', url);
-
-                // Show delete confirmation modal
                 $('#deleteConfirmationModal').modal('show');
             });
 
             // Add row click effect for detail page
             $('#dokumenKapalTable tbody').on('click', 'tr', function(e) {
-                // Don't follow link if clicked on button or link within row
                 if ($(e.target).is('button') || $(e.target).is('a') || $(e.target).is('i') ||
                     $(e.target).closest('button').length || $(e.target).closest('a').length) {
                     return;
                 }
 
-                // Get detail link
                 var detailLink = $(this).find('a[title="Detail"]').attr('href');
                 if (detailLink) {
                     window.location.href = detailLink;
@@ -1113,6 +1066,22 @@
 
             // Force initial sort to apply custom ordering
             table.order([0, 'asc']).draw();
+
+            // Add export form to page
+            $(`
+<form id="exportForm" action="{{ route('dokumen-kapal.export-excel') }}" method="POST" class="d-none">
+    @csrf
+    <input type="hidden" name="filter_noreg" id="export_filter_noreg">
+    <input type="hidden" name="filter_kapal" id="export_filter_kapal">
+    <input type="hidden" name="filter_kategori" id="export_filter_kategori">
+    <input type="hidden" name="filter_nama_dok" id="export_filter_nama_dok">
+    <input type="hidden" name="filter_tgl_terbit_from" id="export_filter_tgl_terbit_from">
+    <input type="hidden" name="filter_tgl_terbit_to" id="export_filter_tgl_terbit_to">
+    <input type="hidden" name="filter_tgl_berakhir_from" id="export_filter_tgl_berakhir_from">
+    <input type="hidden" name="filter_tgl_berakhir_to" id="export_filter_tgl_berakhir_to">
+    <input type="hidden" name="filter_status" id="export_filter_status">
+</form>
+`).insertAfter('#dokumenKapalTable');
         });
     </script>
 @endpush

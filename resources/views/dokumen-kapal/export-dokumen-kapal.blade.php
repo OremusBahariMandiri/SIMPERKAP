@@ -6,12 +6,12 @@
             <th>Nama Kapal</th>
             <th>Kategori</th>
             <th>Nama Dokumen</th>
-            <th>Penerbit</th>
             <th>Tgl Terbit</th>
             <th>Tgl Berakhir</th>
             <th>Tgl Peringatan</th>
-            <th>Masa Berlaku</th>
+            <th>Peringatan</th>
             <th>Status</th>
+            <th>Dokumen</th>
         </tr>
     </thead>
     <tbody>
@@ -22,7 +22,6 @@
                 <td>{{ $dokumen->kapal ? $dokumen->kapal->nama_kpl : '-' }}</td>
                 <td>{{ $dokumen->kategoriDokumen ? $dokumen->kategoriDokumen->kategori_dok : '-' }}</td>
                 <td>{{ $dokumen->namaDokumen ? $dokumen->namaDokumen->nama_dok : '-' }}</td>
-                <td>{{ $dokumen->penerbit_dok ?: '-' }}</td>
                 <td>
                     @if ($dokumen->tgl_terbit_dok)
                         {{ \Carbon\Carbon::parse($dokumen->tgl_terbit_dok)->format('d/m/Y') }}
@@ -44,75 +43,44 @@
                         -
                     @endif
                 </td>
-                <td>{{ $dokumen->masa_berlaku ?: '-' }}</td>
-                <td>{{ $dokumen->status_dok ?: '-' }}</td>
+                <td>
+                    @php
+                        $masaPeringatanText = '-';
+                        if ($dokumen->tgl_peringatan) {
+                            $tglPengingat = \Carbon\Carbon::parse($dokumen->tgl_peringatan);
+                            $today = \Carbon\Carbon::now()->startOf('day');
+                            $diffDays = $tglPengingat->diffInDays($today, false);
+
+                            if ($diffDays < 0) {
+                                $masaPeringatanText = 'Terlambat ' . abs($diffDays) . ' hari';
+                            } elseif ($diffDays == 0) {
+                                $masaPeringatanText = 'Hari ini';
+                            } else {
+                                $masaPeringatanText = $diffDays . ' hari lagi';
+                            }
+                        }
+                    @endphp
+                    {{ $masaPeringatanText }}
+                </td>
+                <td>
+                    @if ($dokumen->status_dok == 'Berlaku')
+                        Berlaku
+                    @elseif ($dokumen->status_dok == 'Tidak Berlaku')
+                        Tidak Berlaku
+                    @else
+                        {{ $dokumen->status_dok ?: '-' }}
+                    @endif
+                </td>
+                <td>
+                    @if ($dokumen->file_dok)
+                        Ada File
+                    @else
+                        -
+                    @endif
+                </td>
             </tr>
         @endforeach
     </tbody>
 </table>
 
-@if($filter)
-<table style="margin-top: 20px;">
-    <tr>
-        <td colspan="2"><strong>Informasi Filter yang Diterapkan:</strong></td>
-    </tr>
-    @if(isset($filter['noreg']) && $filter['noreg'])
-    <tr>
-        <td>No. Registrasi</td>
-        <td>{{ $filter['noreg'] }}</td>
-    </tr>
-    @endif
-    @if(isset($filter['kapal']) && $filter['kapal'])
-    <tr>
-        <td>Kapal</td>
-        <td>{{ $filter['kapal'] }}</td>
-    </tr>
-    @endif
-    @if(isset($filter['kategori']) && $filter['kategori'])
-    <tr>
-        <td>Kategori</td>
-        <td>{{ $filter['kategori'] }}</td>
-    </tr>
-    @endif
-    @if(isset($filter['nama_dok']) && $filter['nama_dok'])
-    <tr>
-        <td>Nama Dokumen</td>
-        <td>{{ $filter['nama_dok'] }}</td>
-    </tr>
-    @endif
-    @if(isset($filter['tgl_terbit_from']) && $filter['tgl_terbit_from'])
-    <tr>
-        <td>Tanggal Terbit (Dari)</td>
-        <td>{{ $filter['tgl_terbit_from'] }}</td>
-    </tr>
-    @endif
-    @if(isset($filter['tgl_terbit_to']) && $filter['tgl_terbit_to'])
-    <tr>
-        <td>Tanggal Terbit (Sampai)</td>
-        <td>{{ $filter['tgl_terbit_to'] }}</td>
-    </tr>
-    @endif
-    @if(isset($filter['tgl_berakhir_from']) && $filter['tgl_berakhir_from'])
-    <tr>
-        <td>Tanggal Berakhir (Dari)</td>
-        <td>{{ $filter['tgl_berakhir_from'] }}</td>
-    </tr>
-    @endif
-    @if(isset($filter['tgl_berakhir_to']) && $filter['tgl_berakhir_to'])
-    <tr>
-        <td>Tanggal Berakhir (Sampai)</td>
-        <td>{{ $filter['tgl_berakhir_to'] }}</td>
-    </tr>
-    @endif
-    @if(isset($filter['status']) && $filter['status'])
-    <tr>
-        <td>Status</td>
-        <td>{{ $filter['status'] }}</td>
-    </tr>
-    @endif
-    <tr>
-        <td>Tanggal Export</td>
-        <td>{{ now()->format('d/m/Y H:i:s') }}</td>
-    </tr>
-</table>
-@endif
+{{-- REMOVE FILTER SECTION FROM TEMPLATE - will be handled by Export class --}}

@@ -27,7 +27,7 @@ class DokumenKapalExport implements FromView, WithTitle, WithStyles, ShouldAutoS
     {
         return view('dokumen-kapal.export-dokumen-kapal', [
             'dokumenKapal' => $this->dokumenKapal,
-            'filter' => $this->filter
+            'filter' => null // UBAH INI - jangan pass filter ke view untuk mencegah duplikasi
         ]);
     }
 
@@ -39,10 +39,7 @@ class DokumenKapalExport implements FromView, WithTitle, WithStyles, ShouldAutoS
     public function styles(Worksheet $sheet)
     {
         return [
-            // Style the first row as headers
             1 => ['font' => ['bold' => true, 'size' => 12]],
-
-            // Add borders to all cells
             'A1:K' . (count($this->dokumenKapal) + 1) => [
                 'borders' => [
                     'allBorders' => [
@@ -62,88 +59,17 @@ class DokumenKapalExport implements FromView, WithTitle, WithStyles, ShouldAutoS
                     ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                     ->getStartColor()->setRGB('4a6fdc');
 
-                // Set text color for header row
-                $event->sheet->getStyle('A1:K1')->getFont()->getColor()
-                    ->setRGB('FFFFFF');
-
-                // Add filter buttons to headers
+                $event->sheet->getStyle('A1:K1')->getFont()->getColor()->setRGB('FFFFFF');
                 $event->sheet->setAutoFilter('A1:K1');
-
-                // Freeze the first row
                 $event->sheet->freezePane('A2');
 
-                // Apply row color highlighting based on document status
-                $rowIndex = 2; // Start from row 2 (after header)
+                // Apply row color highlighting dengan logika yang SAMA PERSIS seperti JavaScript
+                $rowIndex = 2;
 
                 foreach ($this->dokumenKapal as $dokumen) {
-                    // Flag untuk menentukan warna baris
-                    $rowColor = null;
+                    $priority = $this->getRowPriorityJS($dokumen);
+                    $rowColor = $this->getPriorityColor($priority);
 
-                    // Langkah 1: Cek status dokumen (Tidak Berlaku = abu-abu)
-                    if ($dokumen->status_dok == 'Tidak Berlaku') {
-                        $rowColor = 'CCCCCC'; // Abu-abu
-                    }
-                    // Langkah 2: Cek tanggal kadaluarsa dan tanggal peringatan
-                    else {
-                        // Periksa apakah sudah kadaluarsa berdasarkan tanggal berakhir
-                        $isExpired = false;
-                        if ($dokumen->tgl_berakhir_dok) {
-                            $tglBerakhir = \Carbon\Carbon::parse($dokumen->tgl_berakhir_dok);
-                            if ($tglBerakhir->isPast()) {
-                                $isExpired = true;
-                            }
-                        }
-
-                        // Periksa tanggal peringatan
-                        $isWarningPassed = false;
-                        if ($dokumen->tgl_peringatan) {
-                            $tglPeringatan = \Carbon\Carbon::parse($dokumen->tgl_peringatan);
-                            $today = \Carbon\Carbon::now()->startOfDay(); // Reset waktu ke awal hari
-
-                            // PENTING: Bandingkan tanggal yang diformat dengan format yang sama
-                            // Ini cara yang paling akurat untuk memeriksa jika dua tanggal sama
-                            $peringatanDate = $tglPeringatan->format('Y-m-d');
-                            $todayDate = $today->format('Y-m-d');
-
-                            // Jika tanggal peringatan sudah lewat atau sama dengan hari ini, tandai sebagai lewat
-                            if ($tglPeringatan->isPast() || $peringatanDate == $todayDate) {
-                                $isWarningPassed = true;
-                            }
-                        }
-
-                        // Tentukan warna berdasarkan status
-                        if ($isExpired || $isWarningPassed) {
-                            $rowColor = 'FC0000'; // Merah untuk dokumen kadaluarsa atau peringatan lewat/hari ini
-                        }
-                        // Periksa jika mendekati tanggal peringatan (30 hari)
-                        else if ($dokumen->tgl_peringatan) {
-                            $tglPeringatan = \Carbon\Carbon::parse($dokumen->tgl_peringatan);
-                            $today = \Carbon\Carbon::now();
-
-                            // Hanya jika tanggal peringatan di masa depan
-                            if ($tglPeringatan->isFuture()) {
-                                $diffDays = $tglPeringatan->diffInDays($today);
-
-                                if ($diffDays <= 7) {
-                                    $rowColor = 'FFFF00'; // Kuning untuk 7 hari atau kurang
-                                } else if ($diffDays <= 30) {
-                                    $rowColor = '00E013'; // Hijau untuk 30 hari atau kurang
-                                }
-                            }
-                        }
-
-                        // Jika tidak ada warna yang ditentukan, cek jika berakhir dalam 30 hari
-                        if (!$rowColor && $dokumen->tgl_berakhir_dok) {
-                            $tglBerakhir = \Carbon\Carbon::parse($dokumen->tgl_berakhir_dok);
-                            $today = \Carbon\Carbon::now();
-
-                            if ($tglBerakhir->isFuture() && $tglBerakhir->diffInDays($today) <= 30) {
-                                $rowColor = 'FFFF00'; // Kuning untuk dokumen yang akan berakhir dalam 30 hari
-                            }
-                        }
-                    }
-
-                    // Terapkan warna pada baris jika ada
                     if ($rowColor) {
                         $event->sheet->getStyle('A' . $rowIndex . ':K' . $rowIndex)->getFill()
                             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
@@ -153,18 +79,25 @@ class DokumenKapalExport implements FromView, WithTitle, WithStyles, ShouldAutoS
                     $rowIndex++;
                 }
 
-                // Add filter information section if available
+                // PERBAIKAN: Cek apakah ada filter yang aktif
+                $hasActiveFilters = false;
                 if ($this->filter) {
-                    $filterRowStart = count($this->dokumenKapal) + 3;
+                    foreach ($this->filter as $key => $value) {
+                        if (!empty($value)) {
+                            $hasActiveFilters = true;
+                            break;
+                        }
+                    }
+                }
 
-                    // Set title for filter info
+                if ($hasActiveFilters) {
+                    $filterRowStart = count($this->dokumenKapal) + 3;
                     $event->sheet->setCellValue('A' . $filterRowStart, 'Informasi Filter yang Diterapkan:');
                     $event->sheet->mergeCells('A' . $filterRowStart . ':B' . $filterRowStart);
                     $event->sheet->getStyle('A' . $filterRowStart . ':B' . $filterRowStart)->getFont()->setBold(true);
 
                     $currentRow = $filterRowStart + 1;
 
-                    // Add filter details
                     $filterItems = [
                         'noreg' => 'No. Registrasi',
                         'kapal' => 'Kapal',
@@ -178,22 +111,109 @@ class DokumenKapalExport implements FromView, WithTitle, WithStyles, ShouldAutoS
                     ];
 
                     foreach ($filterItems as $key => $label) {
-                        if (isset($this->filter[$key]) && $this->filter[$key]) {
+                        if (isset($this->filter[$key]) && !empty($this->filter[$key])) {
                             $event->sheet->setCellValue('A' . $currentRow, $label);
-                            $event->sheet->setCellValue('B' . $currentRow, $this->filter[$key]);
+
+                            $value = $this->filter[$key];
+                            if (in_array($key, ['tgl_terbit_from', 'tgl_terbit_to', 'tgl_berakhir_from', 'tgl_berakhir_to'])) {
+                                try {
+                                    $value = \Carbon\Carbon::parse($this->filter[$key])->format('d/m/Y');
+                                } catch (\Exception $e) {
+                                    $value = $this->filter[$key];
+                                }
+                            }
+
+                            $event->sheet->setCellValue('B' . $currentRow, $value);
                             $currentRow++;
                         }
                     }
 
-                    // Add export date
                     $event->sheet->setCellValue('A' . $currentRow, 'Tanggal Export');
                     $event->sheet->setCellValue('B' . $currentRow, now()->format('d/m/Y H:i:s'));
 
-                    // Add borders to filter info section
                     $event->sheet->getStyle('A' . $filterRowStart . ':B' . $currentRow)->getBorders()
+                        ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                } else {
+                    // Hanya tampilkan tanggal export jika tidak ada filter aktif
+                    $exportRowStart = count($this->dokumenKapal) + 3;
+                    $event->sheet->setCellValue('A' . $exportRowStart, 'Tanggal Export');
+                    $event->sheet->setCellValue('B' . $exportRowStart, now()->format('d/m/Y H:i:s'));
+                    $event->sheet->getStyle('A' . $exportRowStart . ':B' . $exportRowStart)->getBorders()
                         ->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
                 }
             },
         ];
+    }
+
+    /**
+     * EXACT COPY dari JavaScript getRowPriority function - dengan data transformation
+     */
+    private function getRowPriorityJS($dokumen)
+    {
+        $statusText = $dokumen->status_dok == 'Berlaku' ? 'Berlaku' : 'Tidak Berlaku';
+        $tglBerakhir = $dokumen->tgl_berakhir_dok ?
+            \Carbon\Carbon::parse($dokumen->tgl_berakhir_dok)->format('d/m/Y') : '-';
+        $tglPengingatStr = $dokumen->tgl_peringatan ?
+            \Carbon\Carbon::parse($dokumen->tgl_peringatan)->format('Y-m-d') : null;
+
+        if (str_contains($statusText, "Tidak Berlaku")) {
+            return 5;
+        }
+
+        if ($tglBerakhir !== '-') {
+            $berakhirDate = \Carbon\Carbon::createFromFormat('d/m/Y', $tglBerakhir);
+            $today = \Carbon\Carbon::now()->startOf('day');
+
+            if ($berakhirDate->isBefore($today)) {
+                return 1;
+            }
+        }
+
+        if ($tglPengingatStr) {
+            $tglPengingat = \Carbon\Carbon::parse($tglPengingatStr);
+            $today = \Carbon\Carbon::now()->startOf('day');
+            $diffDays = $today->diffInDays($tglPengingat, false);
+
+            if ($diffDays <= 0) {
+                return 1;
+            } else if ($diffDays <= 7) {
+                return 2;
+            } else if ($diffDays <= 30) {
+                return 3;
+            }
+        }
+
+        if ($tglBerakhir !== '-') {
+            $berakhirDate = \Carbon\Carbon::createFromFormat('d/m/Y', $tglBerakhir);
+            $today = \Carbon\Carbon::now()->startOf('day');
+            $diffDays = $today->diffInDays($berakhirDate, false);
+
+            if ($diffDays > 0 && $diffDays <= 30) {
+                return 2;
+            }
+        }
+
+        return 4;
+    }
+
+    /**
+     * Get warna berdasarkan priority
+     */
+    private function getPriorityColor($priority)
+    {
+        switch ($priority) {
+            case 1:
+                return 'FC0000'; // Merah - Expired/Critical
+            case 2:
+                return 'FFFF00'; // Kuning - Warning urgent (7 hari atau kurang)
+            case 3:
+                return '00E013'; // Hijau - Warning normal (8-30 hari)
+            case 4:
+                return null; // Putih - Normal (tidak perlu warna)
+            case 5:
+                return 'CCCCCC'; // Abu-abu - Tidak berlaku
+            default:
+                return null;
+        }
     }
 }

@@ -465,98 +465,168 @@ class DokumenKapalController extends Controller
         return redirect()->route('dokumen-kapal.download', $dokumenKapal);
     }
 
-    /**
-     * Export dokumen kapal ke Excel berdasarkan filter
-     */
-    public function exportExcel(Request $request)
-    {
-        // Ambil parameter filter
-        $filters = [
-            'noreg' => $request->filter_noreg,
-            'kapal' => $request->filter_kapal,
-            'kategori' => $request->filter_kategori,
-            'nama_dok' => $request->filter_nama_dok,
-            'tgl_terbit_from' => $request->filter_tgl_terbit_from,
-            'tgl_terbit_to' => $request->filter_tgl_terbit_to,
-            'tgl_berakhir_from' => $request->filter_tgl_berakhir_from,
-            'tgl_berakhir_to' => $request->filter_tgl_berakhir_to,
-            'status' => $request->filter_status,
-        ];
+/**
+ * Export dokumen kapal ke Excel berdasarkan filter - EXACT MATCH dengan Index Page
+ */
+public function exportExcel(Request $request)
+{
+    // Ambil parameter filter
+    $filters = [
+        'noreg' => $request->filter_noreg,
+        'kapal' => $request->filter_kapal,
+        'kategori' => $request->filter_kategori,
+        'nama_dok' => $request->filter_nama_dok,
+        'tgl_terbit_from' => $request->filter_tgl_terbit_from,
+        'tgl_terbit_to' => $request->filter_tgl_terbit_to,
+        'tgl_berakhir_from' => $request->filter_tgl_berakhir_from,
+        'tgl_berakhir_to' => $request->filter_tgl_berakhir_to,
+        'status' => $request->filter_status,
+    ];
 
-        // Query data berdasarkan filter
-        $query = DokumenKapal::with(['kapal', 'kategoriDokumen', 'namaDokumen']);
+    // Query data berdasarkan filter - sama persis seperti di index
+    $query = DokumenKapal::with(['kapal', 'kategoriDokumen', 'namaDokumen']);
 
-        // Filter No Registrasi
-        if ($request->filled('filter_noreg')) {
-            $query->where('no_reg', 'like', '%' . $request->filter_noreg . '%');
-        }
-
-        // Filter Kapal
-        if ($request->filled('filter_kapal')) {
-            $query->whereHas('kapal', function ($q) use ($request) {
-                $q->where('nama_kpl', $request->filter_kapal);
-            });
-        }
-
-        // Filter Kategori
-        if ($request->filled('filter_kategori')) {
-            $query->whereHas('kategoriDokumen', function ($q) use ($request) {
-                $q->where('kategori_dok', $request->filter_kategori);
-            });
-        }
-
-        // Filter Nama Dokumen
-        if ($request->filled('filter_nama_dok')) {
-            $query->whereHas('namaDokumen', function ($q) use ($request) {
-                $q->where('nama_dok', $request->filter_nama_dok);
-            });
-        }
-
-        // Filter Tanggal Terbit
-        if ($request->filled('filter_tgl_terbit_from')) {
-            $query->where('tgl_terbit_dok', '>=', $request->filter_tgl_terbit_from);
-        }
-        if ($request->filled('filter_tgl_terbit_to')) {
-            $query->where('tgl_terbit_dok', '<=', $request->filter_tgl_terbit_to);
-        }
-
-        // Filter Tanggal Berakhir
-        if ($request->filled('filter_tgl_berakhir_from')) {
-            $query->where('tgl_berakhir_dok', '>=', $request->filter_tgl_berakhir_from);
-        }
-        if ($request->filled('filter_tgl_berakhir_to')) {
-            $query->where('tgl_berakhir_dok', '<=', $request->filter_tgl_berakhir_to);
-        }
-
-        // Filter Status Dokumen
-        if ($request->filled('filter_status')) {
-            if ($request->filter_status === 'Valid') {
-                $query->where('status_dok', 'Berlaku')
-                    ->where(function ($q) {
-                        $q->whereNull('tgl_berakhir_dok')
-                            ->orWhere('tgl_berakhir_dok', '>', now()->addDays(30));
-                    });
-            } else if ($request->filter_status === 'Warning') {
-                $query->where('status_dok', 'Berlaku')
-                    ->where('tgl_berakhir_dok', '>', now())
-                    ->where('tgl_berakhir_dok', '<=', now()->addDays(30));
-            } else if ($request->filter_status === 'Expired') {
-                $query->where(function ($q) {
-                    $q->where('status_dok', 'Tidak Berlaku')
-                        ->orWhere(function ($subq) {
-                            $subq->whereNotNull('tgl_berakhir_dok')
-                                ->where('tgl_berakhir_dok', '<', now());
-                        });
-                });
-            }
-        }
-
-        $dokumenKapal = $query->get();
-
-        // Format tanggal untuk nama file
-        $currentDate = now()->format('d-m-Y_H-i-s');
-        $fileName = 'Dokumen_Kapal_' . $currentDate . '.xlsx';
-
-        return Excel::download(new DokumenKapalExport($dokumenKapal, $filters), $fileName);
+    // Filter No Registrasi
+    if ($request->filled('filter_noreg')) {
+        $query->where('no_reg', 'like', '%' . $request->filter_noreg . '%');
     }
+
+    // Filter Kapal - sesuaikan dengan nama_kpl
+    if ($request->filled('filter_kapal')) {
+        $query->whereHas('kapal', function ($q) use ($request) {
+            $q->where('nama_kpl', $request->filter_kapal);
+        });
+    }
+
+    // Filter Kategori - sesuaikan dengan kategori_dok
+    if ($request->filled('filter_kategori')) {
+        $query->whereHas('kategoriDokumen', function ($q) use ($request) {
+            $q->where('kategori_dok', $request->filter_kategori);
+        });
+    }
+
+    // Filter Nama Dokumen - sesuaikan dengan nama_dok
+    if ($request->filled('filter_nama_dok')) {
+        $query->whereHas('namaDokumen', function ($q) use ($request) {
+            $q->where('nama_dok', $request->filter_nama_dok);
+        });
+    }
+
+    // Filter Tanggal Terbit
+    if ($request->filled('filter_tgl_terbit_from')) {
+        $query->where('tgl_terbit_dok', '>=', $request->filter_tgl_terbit_from);
+    }
+    if ($request->filled('filter_tgl_terbit_to')) {
+        $query->where('tgl_terbit_dok', '<=', $request->filter_tgl_terbit_to);
+    }
+
+    // Filter Tanggal Berakhir
+    if ($request->filled('filter_tgl_berakhir_from')) {
+        $query->where('tgl_berakhir_dok', '>=', $request->filter_tgl_berakhir_from);
+    }
+    if ($request->filled('filter_tgl_berakhir_to')) {
+        $query->where('tgl_berakhir_dok', '<=', $request->filter_tgl_berakhir_to);
+    }
+
+    // Filter Status Dokumen - sesuaikan dengan JavaScript filtering
+    if ($request->filled('filter_status')) {
+        if ($request->filter_status === 'Valid') {
+            $query->where('status_dok', 'Berlaku')
+                ->where(function ($q) {
+                    $q->whereNull('tgl_berakhir_dok')
+                        ->orWhere('tgl_berakhir_dok', '>', now()->addDays(30));
+                });
+        } else if ($request->filter_status === 'Warning') {
+            $query->where('status_dok', 'Berlaku')
+                ->where('tgl_berakhir_dok', '>', now())
+                ->where('tgl_berakhir_dok', '<=', now()->addDays(30));
+        } else if ($request->filter_status === 'Expired') {
+            $query->where(function ($q) {
+                $q->where('status_dok', 'Tidak Berlaku')
+                    ->orWhere(function ($subq) {
+                        $subq->whereNotNull('tgl_berakhir_dok')
+                            ->where('tgl_berakhir_dok', '<', now());
+                    });
+            });
+        }
+    }
+
+    // Get data
+    $dokumenKapal = $query->get();
+
+    // Transform data untuk menambahkan field yang dibutuhkan sorting (simulasi JavaScript)
+    $dokumenKapal = $dokumenKapal->map(function ($dokumen) {
+        $dokumen->status_text_display = $dokumen->status_dok == 'Berlaku' ? 'Berlaku' : 'Tidak Berlaku';
+        $dokumen->tgl_berakhir_display = $dokumen->tgl_berakhir_dok ?
+            \Carbon\Carbon::parse($dokumen->tgl_berakhir_dok)->format('d/m/Y') : '-';
+        $dokumen->tgl_peringatan_attr = $dokumen->tgl_peringatan ?
+            \Carbon\Carbon::parse($dokumen->tgl_peringatan)->format('Y-m-d') : null;
+        return $dokumen;
+    });
+
+    // Sort berdasarkan prioritas (SIMULASI PERSIS seperti JavaScript di index)
+    $dokumenKapal = $dokumenKapal->sort(function($a, $b) {
+        $priorityA = $this->getRowPriorityJS($a);
+        $priorityB = $this->getRowPriorityJS($b);
+        return $priorityA <=> $priorityB;
+    })->values();
+
+    $currentDate = now()->format('d-m-Y_H-i-s');
+    $fileName = 'Dokumen_Kapal_' . $currentDate . '.xlsx';
+
+    return Excel::download(new DokumenKapalExport($dokumenKapal, $filters), $fileName);
+}
+
+/**
+ * EXACT COPY dari JavaScript getRowPriority function
+ */
+private function getRowPriorityJS($dokumen)
+{
+    $statusText = $dokumen->status_text_display;
+    $tglBerakhir = $dokumen->tgl_berakhir_display;
+    $tglPengingatStr = $dokumen->tgl_peringatan_attr;
+
+    // Priority 5 (lowest): Documents with "Tidak Berlaku" status (gray)
+    if (str_contains($statusText, "Tidak Berlaku")) {
+        return 5;
+    }
+
+    // Check if document is expired based on TglBerakhir
+    if ($tglBerakhir !== '-') {
+        $berakhirDate = \Carbon\Carbon::createFromFormat('d/m/Y', $tglBerakhir);
+        $today = \Carbon\Carbon::now()->startOf('day');
+
+        if ($berakhirDate->isBefore($today)) {
+            return 1; // Priority 1 (highest): Expired documents (red)
+        }
+    }
+
+    // Check TglPengingat for warning/expired status
+    if ($tglPengingatStr) {
+        $tglPengingat = \Carbon\Carbon::parse($tglPengingatStr);
+        $today = \Carbon\Carbon::now()->startOf('day');
+        $diffDays = $today->diffInDays($tglPengingat, false);
+
+        if ($diffDays <= 0) {
+            return 1; // Priority 1: Already expired or today (red)
+        } else if ($diffDays <= 7) {
+            return 2; // Priority 2: Urgent warning within 7 days (yellow)
+        } else if ($diffDays <= 30) {
+            return 3; // Priority 3: Warning within 30 days (orange/green)
+        }
+    }
+
+    // Check TglBerakhir for warning (within 30 days)
+    if ($tglBerakhir !== '-') {
+        $berakhirDate = \Carbon\Carbon::createFromFormat('d/m/Y', $tglBerakhir);
+        $today = \Carbon\Carbon::now()->startOf('day');
+        $diffDays = $today->diffInDays($berakhirDate, false);
+
+        if ($diffDays > 0 && $diffDays <= 30) {
+            return 2; // Priority 2: Warning within 30 days (yellow)
+        }
+    }
+
+    return 4; // Priority 4: Normal documents (no highlight)
+}
 }
